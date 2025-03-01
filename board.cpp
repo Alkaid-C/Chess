@@ -181,40 +181,22 @@
 			return false;
 		}
 	}
-	vector<pair<int8_t, int8_t>> board::WhiteControlledSquares()
+	vector<pair<int_fast8_t, int_fast8_t>> board::WhiteOccupiedSquares()
 	{
-		vector<pair<int8_t, int8_t>> result;
+		vector<pair<int_fast8_t, int_fast8_t>> result;
 		for (int_fast8_t row = 1; row < 9; row++)
 		{
 			for (int_fast8_t col = 1; col < 9; col++)
 			{
 				if (isWhite(row, col))
 				{
-					if (CurBoard[row][col] == WhitePawn)
-					{
-						if (isInTheBoard(row + 1, col + 1))
-						{
-							result.push_back({ row + 1,col + 1 });
-						}
-						if (isInTheBoard(row + 1, col - 1))
-						{
-							result.push_back({ row + 1,col - 1 });
-						}
-					}
-					else
-					{ 
-					vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(row, col);
-						for (int_fast8_t i = 0; i < PossibleMoves.size(); i++)
-						{
-							result.push_back(PossibleMoves[i]);
-						}
-					}
+					result.push_back({ row,col });
 				}
 			}
 		}
 		return result;
 	}
-	vector<pair<int_fast8_t, int_fast8_t>> board::BlackControlledSquares()
+	vector<pair<int_fast8_t, int_fast8_t>> board::BlackOccupiedSquares()
 	{
 		vector<pair<int_fast8_t, int_fast8_t>> result;
 		for (int_fast8_t row = 1; row < 9; row++)
@@ -223,25 +205,64 @@
 			{
 				if (isBlack(row, col))
 				{
-					if (CurBoard[row][col] == BlackPawn)
-					{
-						if (isInTheBoard(row - 1, col + 1))
-						{
-							result.push_back({ row - 1,col + 1 });
-						}
-						if (isInTheBoard(row - 1, col - 1))
-						{
-							result.push_back({ row - 1,col - 1 });
-						}
-					}
-					else
-					{
-						vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(row, col);
-						for (int_fast8_t i = 0; i < PossibleMoves.size(); i++)
-						{
-							result.push_back(PossibleMoves[i]);
-						}
-					}
+					result.push_back({ row,col });
+				}
+			}
+		}
+		return result;
+	}
+	vector<pair<int8_t, int8_t>> board::WhiteControlledSquares()
+	{
+		vector<pair<int_fast8_t, int_fast8_t>> WhitePieces = WhiteOccupiedSquares();
+		vector<pair<int8_t, int8_t>> result;
+		for (int_fast8_t i = 0; i < WhitePieces.size(); i++)
+		{
+
+			if (CurBoard[WhitePieces[i].first][WhitePieces[i].second] == WhitePawn)
+			{
+				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second + 1))
+				{
+					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second + 1 });
+				}
+				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second - 1))
+				{
+					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second - 1 });
+				}
+			}
+			else
+			{
+				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(WhitePieces[i].first,WhitePieces[i].second);
+				for (int_fast8_t i = 0; i < PossibleMoves.size(); i++)
+				{
+					result.push_back(PossibleMoves[i]);
+				}
+			}
+		}
+		return result;
+	}
+	vector<pair<int_fast8_t, int_fast8_t>> board::BlackControlledSquares()
+	{
+		vector<pair<int_fast8_t, int_fast8_t>> BlackPieces = BlackOccupiedSquares();
+		vector<pair<int_fast8_t, int_fast8_t>> result;
+		for (int_fast8_t i = 0; i < BlackPieces.size(); i++)
+		{
+			if (CurBoard[BlackPieces[i].first][BlackPieces[i].second] == BlackPawn)
+			{
+				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second + 1))
+				{
+					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second + 1 });
+				}
+				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second - 1))
+				{
+					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second - 1 });
+				}
+			}
+			else
+			{
+				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(BlackPieces[i].first, BlackPieces[i].second);
+				for (int_fast8_t i = 0; i < PossibleMoves.size(); i++)
+				{
+					result.push_back(PossibleMoves[i]);
 				}
 			}
 		}
@@ -299,14 +320,14 @@
 	{
 		if (isWhiteChecked())
 		{
-			vector<pair<int_fast8_t, int_fast8_t>> WhiteControlled = WhiteControlledSquares();
-			for (int_fast8_t i = 0; i < WhiteControlled.size(); i++)
+			vector<pair<int_fast8_t, int_fast8_t>> WhitePieces = WhiteOccupiedSquares();
+			for (int_fast8_t i = 0; i < WhitePieces.size(); i++)
 			{
-				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(WhiteControlled[i].first, WhiteControlled[i].second);
+				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(WhitePieces[i].first, WhitePieces[i].second);
 				for (int_fast8_t j = 0; j < PossibleMoves.size(); j++)
 				{
 					board NewBoard = *this;
-					NewBoard.move(WhiteControlled[i].first, WhiteControlled[i].second, PossibleMoves[j].first, PossibleMoves[j].second);
+					NewBoard.move(WhitePieces[i].first, WhitePieces[i].second, PossibleMoves[j].first, PossibleMoves[j].second);
 					if (!NewBoard.isWhiteChecked())
 					{
 						return false;
@@ -324,14 +345,14 @@
 	{
 		if (isBlackChecked())
 		{
-			vector<pair<int_fast8_t, int_fast8_t>> BlackControlled = BlackControlledSquares();
-			for (int_fast8_t i = 0; i < BlackControlled.size(); i++)
+			vector<pair<int_fast8_t, int_fast8_t>> BlackPieces = BlackOccupiedSquares();
+			for (int_fast8_t i = 0; i < BlackPieces.size(); i++)
 			{
-				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(BlackControlled[i].first, BlackControlled[i].second);
+				vector<pair<int_fast8_t, int_fast8_t>> PossibleMoves = getPossibleMoves(BlackPieces[i].first, BlackPieces[i].second);
 				for (int_fast8_t j = 0; j < PossibleMoves.size(); j++)
 				{
 					board NewBoard = *this;
-					NewBoard.move(BlackControlled[i].first, BlackControlled[i].second, PossibleMoves[j].first, PossibleMoves[j].second);
+					NewBoard.move(BlackPieces[i].first, BlackPieces[i].second, PossibleMoves[j].first, PossibleMoves[j].second);
 					if (!NewBoard.isBlackChecked())
 					{
 						return false;

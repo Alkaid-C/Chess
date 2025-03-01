@@ -51,6 +51,8 @@ public:
 	bool isWhite(int_fast8_t row, int_fast8_t col);
 	bool isBlack(int_fast8_t row, int_fast8_t col);
 	bool isInTheBoard(int_fast8_t row, int_fast8_t col);
+	vector<pair<int_fast8_t, int_fast8_t>> WhiteOccupiedSquares();
+	vector<pair<int_fast8_t, int_fast8_t>> BlackOccupiedSquares();
 	vector<pair<int_fast8_t, int_fast8_t>> WhiteControlledSquares();
 	vector<pair<int_fast8_t, int_fast8_t>> BlackControlledSquares();
 	bool isWhiteControlled(int_fast8_t row, int_fast8_t col);
