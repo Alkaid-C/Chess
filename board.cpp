@@ -1730,3 +1730,165 @@
 			}
 		}
 	}
+	pair<pair<int_fast8_t, int_fast8_t>, pair<int_fast8_t, int_fast8_t>> board::AlgebraicNotationDecoder(string notation, char mover)
+	{
+		notation.erase(remove(notation.begin(), notation.end(), 'x'), notation.end());
+		notation.erase(remove(notation.begin(), notation.end(), '#'), notation.end());
+		pair<int_fast8_t, int_fast8_t> start;
+		pair<int_fast8_t, int_fast8_t> end;
+		if (isdigit(notation.at(notation.length() - 1)))
+		{
+			end.first = notation.at(notation.length() - 1) - '0';
+			end.second = notation.at(notation.length() - 2) - 'a' + 1;
+			if (notation.length() == 2)//Pawn move
+			{
+				if (mover==White)
+				{
+					if (CurBoard[end.first][end.second] == Empty)
+					{
+						
+						if (//check if it is en passant
+							end.first == 6
+							&& MoveHistory[MoveHistory.size() - 1].first.first == 7
+							&& MoveHistory[MoveHistory.size() - 1].second.first == 5
+							&& MoveHistory[MoveHistory.size() - 1].first.second == end.second
+							&& MoveHistory[MoveHistory.size() - 1].second.second == end.second
+							)
+						{
+							start.first = 5;
+							if (isInTheBoard(5, end.second + 1) && CurBoard[5][end.second + 1] == WhitePawn)
+							{
+								start.second = end.second + 1;
+							}
+							else if (isInTheBoard(5, end.second - 1) && CurBoard[5][end.second - 1] == WhitePawn)
+							{
+								start.second = end.second - 1;
+							}
+							else
+							{
+								cout << "Notaion Decode Fails - believed to be En Passant, but cannot find piece taken." << endl;
+							}
+							return { start,end };
+						}
+						else// not enpassant
+						{
+							if (isInTheBoard(end.first - 1, end.second) && CurBoard[end.first - 1][end.second] == WhitePawn)
+							{
+								start.first = end.first - 1;
+								start.second = end.second;
+								return { start,end };
+							}
+							else if (isInTheBoard(end.first - 2, end.second) && CurBoard[end.first - 2][end.second] == WhitePawn)
+							{
+								start.first = end.first - 1;
+								start.second = end.second;
+								return { start,end };
+							}
+							else
+							{
+								cout << "Notaion Decode Fails - believed to be pawn forward, but cannot find original pawn." << endl;
+							}
+						}
+					}
+					else if (CurBoard[end.first][end.second] == Black)
+					{
+						if (isInTheBoard(end.first - 1, end.second - 1) && CurBoard[end.first - 1][end.second - 1] == WhitePawn)
+						{
+							start.first = end.first - 1;
+							start.second = end.second - 1;
+							return { start,end };
+						}
+						else if (isInTheBoard(end.first - 1, end.second + 1) && CurBoard[end.first - 1][end.second + 1] == WhitePawn)
+						{
+							start.first = end.first - 1;
+							start.second = end.second + 1;
+							return { start,end };
+						}
+						else
+						{
+							cout << "Notaion Decode Fails - believed to be pawn taking, but cannot find original pawn." << endl;
+						}
+
+					}
+					else
+					{
+						cout << "Notaion Decode Fails - believed to be pawn move, but destination is not reachable." << endl;
+					}
+				}
+				else
+				{
+					if (CurBoard[end.first][end.second] == Empty)
+					{
+						if (//check if it is en passant
+							end.first == 3
+							&& MoveHistory[MoveHistory.size() - 1].first.first == 2
+							&& MoveHistory[MoveHistory.size() - 1].second.first == 4
+							&& MoveHistory[MoveHistory.size() - 1].first.second == end.second
+							&& MoveHistory[MoveHistory.size() - 1].second.second == end.second
+							)
+						{
+							start.first = 4;
+							if (isInTheBoard(4, end.second + 1) && CurBoard[4][end.second + 1] == BlackPawn)
+							{
+								start.second = end.second + 1;
+							}
+							else if (isInTheBoard(4, end.second - 1) && CurBoard[4][end.second - 1] == BlackPawn)
+							{
+								start.second = end.second - 1;
+							}
+							else
+							{
+								cout << "Notaion Decode Fails - believed to be En Passant, but cannot find piece taken." << endl;
+							}
+							return { start,end };
+						}
+						else// not enpassant
+						{
+							if (isInTheBoard(end.first + 1, end.second) && CurBoard[end.first + 1][end.second] == BlackPawn)
+							{
+								start.first = end.first + 1;
+								start.second = end.second;
+								return { start,end };
+							}
+							else if (isInTheBoard(end.first + 2, end.second) && CurBoard[end.first + 2][end.second] == BlackPawn)
+							{
+								start.first = end.first + 1;
+								start.second = end.second;
+								return { start,end };
+							}
+							else
+							{
+								cout << "Notaion Decode Fails - believed to be pawn forward, but cannot find original pawn." << endl;
+							}
+						}
+					}
+					else if (CurBoard[end.first][end.second] == White)
+					{
+						if (isInTheBoard(end.first + 1, end.second - 1) && CurBoard[end.first + 1][end.second - 1] == BlackPawn)
+						{
+							start.first = end.first + 1;
+							start.second = end.second - 1;
+							return { start,end };
+						}
+						else if (isInTheBoard(end.first + 1, end.second + 1) && CurBoard[end.first + 1][end.second + 1] == BlackPawn)
+						{
+							start.first = end.first + 1;
+							start.second = end.second + 1;
+							return { start,end };
+						}
+						else
+						{
+							cout << "Notaion Decode Fails - believed to be pawn taking, but cannot find original pawn." << endl;
+						}
+					}
+					else
+					{
+						cout << "Notaion Decode Fails - believed to be pawn move, but destination is not reachable." << endl;
+					}
+				}
+			}
+
+		}
+		return { start,end };
+
+	}

@@ -19,11 +19,15 @@
 #define BlackKing 'K'
 #define WhiteKing 'k'
 #define Empty '*'
+#define White 'w'
+#define Black 'b'
 #pragma once
+
+#include <vector>
+#include <string>
 
 #ifndef _BOARD_H
 #define _BOARD_H
-#include <vector>
 using namespace std;
 
 
@@ -65,6 +69,7 @@ public:
 	vector<pair<int_fast8_t, int_fast8_t>> getPossibleEnPassant(int_fast8_t row, int_fast8_t col);
 	vector<pair<int_fast8_t, int_fast8_t>> getPossibleCastling(int_fast8_t row, int_fast8_t col);
 	void move(int_fast8_t row, int_fast8_t col, int_fast8_t newRow, int_fast8_t newCol);
+	pair<pair<int_fast8_t, int_fast8_t>, pair<int_fast8_t, int_fast8_t>> AlgebraicNotationDecoder(string notation, char mover);
 	
 };
 #endif // !BOARD_H
