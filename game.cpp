@@ -3,11 +3,14 @@
 
 static void testGame1();
 static void testGame2();
+static void testGame3();
 
 int main()
 {
-	testGame1();
-	testGame2();
+	//currently it serve as test; later it will handle the game loop
+	testGame1();//real game, castling, black wins
+	testGame2();//real game, castling, black wins
+	testGame3();//real game, white wins
 }
 static void testGame1()
 {
@@ -126,3 +129,30 @@ static void testGame2()
 	theboard.printBoard();
 	return;
 }
+
+static void testGame3()
+{
+	board theboard;
+	theboard.printBoard();
+	theboard.move(2, E, 4, E);
+	theboard.printBoard();
+	theboard.move(7, D, 5, D);
+	theboard.printBoard();
+	theboard.move(1, D, 5, H);
+	theboard.printBoard();
+	theboard.move(5, D, 4, E);
+	theboard.printBoard();
+	theboard.move(1, F, 5, B);
+	theboard.printBoard();
+	theboard.move(8, C, 7, D);
+	theboard.printBoard();
+	theboard.move(5, B, 4, C);
+	theboard.printBoard();
+	theboard.move(8, B, 6, C);
+	theboard.printBoard();
+	theboard.move(5, H, 7, F);
+	theboard.printBoard();
+	return;
+}
+
+
