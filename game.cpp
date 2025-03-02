@@ -4,13 +4,11 @@
 static void testGame1();
 static void testGame2();
 static void testGame3();
+static void twoPlayerGame();
 
 int main()
 {
-	//currently it serve as test; later it will handle the game loop
-	testGame1();//real game, castling, black wins
-	testGame2();//real game, castling, black wins
-	testGame3();//real game, white wins
+	twoPlayerGame();
 }
 static void testGame1()
 {
@@ -155,4 +153,69 @@ static void testGame3()
 	return;
 }
 
-
+static void twoPlayerGame()
+{
+	board theboard;
+	string piece;
+	string target;
+	int row;
+	int col;
+	int newRow;
+	int newCol;
+	theboard.printBoard();
+	while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+	{
+		if (theboard.mover == White)
+		{
+			cout << "White's turn" << endl;
+		}
+		else
+		{
+			cout << "Black's turn" << endl;
+		}
+		cout << "Enter row and col of the piece you want to move (e.g., 2d, 2D, d2, or D2)" << endl;
+		cin >> piece;
+		cout << "Enter row and col of the square you want to move to(e.g., 4d, 4D, d4, or D4)" << endl;
+		cin >>target;
+		if (isdigit(piece[0]))
+		{
+			row = piece[0] - '0';
+			col = piece[1] - 'A'+1;
+			if (col > 8 || col <0)
+			{
+				col = piece[1] - 'a' + 1;
+			}
+		}
+		else
+		{
+			row = piece[1] - '0';
+			col = piece[0] - 'A' + 1;
+			if (col > 8 || col < 0)
+			{
+				col = piece[0] - 'a' + 1;
+			}
+		}
+		if (isdigit(target[0]))
+		{
+			newRow = target[0] - '0';
+			newCol = target[1] - 'A' + 1;
+			if (newCol > 8 || newCol < 0)
+			{
+				newCol = target[1] - 'a' + 1;
+			}
+		}
+		else
+		{
+			newRow = target[1] - '0';
+			newCol = target[0] - 'A' + 1;
+			if (newCol > 8 || newCol < 0)
+			{
+				newCol = target[0] - 'a' + 1;
+			}
+		}
+		theboard.move(row, col, newRow, newCol);
+		theboard.printBoard();
+	}
+	theboard.printBoard();
+	return;
+}
