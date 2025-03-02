@@ -19,8 +19,8 @@
 #define BlackKing 'K'
 #define WhiteKing 'k'
 #define Empty '*'
-#define White 'w'
-#define Black 'b'
+#define White true
+#define Black false
 #pragma once
 
 #include <vector>
@@ -43,33 +43,39 @@ public:
 	bool WhiteCastleQueenSideQualified;
 	bool BlackCastleKingSideQualified;
 	bool BlackCastleQueenSideQualified;
-	vector<pair<pair<int_fast8_t, int_fast8_t>, pair<int_fast8_t, int_fast8_t>>> MoveHistory;
+	bool mover;
+	vector<pair<pair<int, int>, pair<int, int>>> MoveHistory;
 	board();
 	board(const board& theboard);
-	char getPieceAt(int_fast8_t row, int_fast8_t col);
-	void setPieceAt(int_fast8_t row, int_fast8_t col, char newPiece);
-	void removePiece(int_fast8_t row, int_fast8_t col);
+	char getPieceAt(int row, int col);
+	void setPieceAt(int row, int col, char newPiece);
+	void removePiece(int row, int col);
 	void printBoard();
 	int getWhiteMaterialAdvantage();
 	int getBlackMaterialAdvantage();
-	bool isWhite(int_fast8_t row, int_fast8_t col);
-	bool isBlack(int_fast8_t row, int_fast8_t col);
-	bool isInTheBoard(int_fast8_t row, int_fast8_t col);
-	vector<pair<int_fast8_t, int_fast8_t>> WhiteOccupiedSquares();
-	vector<pair<int_fast8_t, int_fast8_t>> BlackOccupiedSquares();
-	vector<pair<int_fast8_t, int_fast8_t>> WhiteControlledSquares();
-	vector<pair<int_fast8_t, int_fast8_t>> BlackControlledSquares();
-	bool isWhiteControlled(int_fast8_t row, int_fast8_t col);
-	bool isBlackControlled(int_fast8_t row, int_fast8_t col);
+	bool isWhite(int row, int col);
+	bool isBlack(int row, int col);
+	bool isInTheBoard(int row, int col);
+	vector<pair<int, int>> WhiteOccupiedSquares();
+	vector<pair<int, int>> BlackOccupiedSquares();
+	vector<pair<int, int>> WhiteControlledSquares();
+	vector<pair<int, int>> BlackControlledSquares();
+	bool isWhiteControlled(int row, int col);
+	bool isBlackControlled(int row, int col);
 	bool isWhiteChecked();
 	bool isBlackChecked();
+	bool willWhiteBeChecked(int row, int col, int newRow, int newCol);
+	bool willBlackBeChecked(int row, int col, int newRow, int newCol);
 	bool isWhiteCheckmated();
 	bool isBlackCheckmated();
-	vector<pair<int_fast8_t, int_fast8_t>> getPossibleMoves(int_fast8_t row, int_fast8_t col);
-	vector<pair<int_fast8_t, int_fast8_t>> getPossibleEnPassant(int_fast8_t row, int_fast8_t col);
-	vector<pair<int_fast8_t, int_fast8_t>> getPossibleCastling(int_fast8_t row, int_fast8_t col);
-	void move(int_fast8_t row, int_fast8_t col, int_fast8_t newRow, int_fast8_t newCol);
-	pair<pair<int_fast8_t, int_fast8_t>, pair<int_fast8_t, int_fast8_t>> AlgebraicNotationDecoder(string notation, char mover);
+	bool isWhiteStalemated();
+	bool isBlackStalemated();
+	vector<pair<int, int>> getPossibleMoves(int row, int col);
+	vector<pair<int, int>> getPossibleEnPassant(int row, int col);
+	vector<pair<int, int>> getPossibleCastling(int row, int col);
+	void move(int row, int col, int newRow, int newCol);
+	void moveNoCheck(int row, int col, int newRow, int newCol);
+	pair<pair<int, int>, pair<int, int>> AlgebraicNotationDecoder(string notation, char mover);
 	
 };
 #endif // !BOARD_H

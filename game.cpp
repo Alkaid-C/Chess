@@ -1,10 +1,12 @@
 #include "board.h"
+#include <iostream>
 
 
 int main()
 {
 	board theboard;
 	theboard.printBoard();
+	cout << "tomove" << endl;
 	theboard.move(2, E, 4, E);
 	theboard.printBoard();
 	theboard.move(7, D, 5, D);
