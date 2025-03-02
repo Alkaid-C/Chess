@@ -102,7 +102,6 @@ static void testGame2()
 	theboard.printBoard();
 	theboard.move(4, H, 3, F);
 	theboard.printBoard();
-	cout<< "theboard.move(7, E, 6, E)"<<endl;
 	theboard.move(7, E, 6, E);
 	theboard.printBoard();
 	theboard.move(1, D, 2, E);
