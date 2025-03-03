@@ -44,12 +44,14 @@ public:
 	bool BlackCastleKingSideQualified;
 	bool BlackCastleQueenSideQualified;
 	bool mover;
+	bool unicodeSupported;
 	vector<pair<pair<int, int>, pair<int, int>>> MoveHistory;
 	board();
 	board(const board& theboard);
 	char getPieceAt(int row, int col);
 	void setPieceAt(int row, int col, char newPiece);
 	void removePiece(int row, int col);
+	void PieceCast(char piece);
 	void printBoard();
 	int getWhiteMaterialAdvantage();
 	int getBlackMaterialAdvantage();

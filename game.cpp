@@ -8,7 +8,6 @@ static void testGame4();
 static void twoPlayerGame();
 char static ColCast(int col);
 static pair<pair<int, int>, pair<int, int>> AskForMove();
-
 static void PlayWithComputer(int depth);
 
 int main()
@@ -298,19 +297,25 @@ static void PlayWithComputer(int depth)
 	cout << "You want to play: (B/W)" << endl;
 	char user;
 	cin >> user;
-	if (user == 'B')
+	cout << "Computer Smarterness: (Recommended is  4. If you set it to 5, it will take up to a minute or so to compute each step. Set it to 6 or above will take even more.)" << endl;
+	cin >> depth;
+	if (user == 'W')
 	{
 		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
 		{
 			if (theboard.mover == Black)
 			{
+				cout << "Computer is thinking..." << endl;
 				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findBlackBestMove(depth);
+				cout << "Computer plays:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
 				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
 				theboard.printBoard();
 			}
 			else
 			{
 				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				system("cls");
+				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
 				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
 				theboard.printBoard();
 			}
@@ -322,13 +327,18 @@ static void PlayWithComputer(int depth)
 		{
 			if (theboard.mover == White)
 			{
+				cout << "Computer is thinking..." << endl;
 				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findWhiteBestMove(depth);
 				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
+				cout << "Computer plays:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
 				theboard.printBoard();
 			}
 			else
 			{
+
 				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				system("cls");
+				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
 				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
 				theboard.printBoard();
 			}

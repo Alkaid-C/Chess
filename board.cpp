@@ -1,6 +1,8 @@
+﻿
 #include "board.h"
 #include <iostream>
 
+#pragma execution_character_set("utf-8")
     board::board()
     {
         CurBoard = { 
@@ -23,6 +25,47 @@
         BlackCastleQueenSideQualified = true;
 		MoveHistory = {};
 		mover = White;
+		system("chcp 65001");
+		cout << "Does your terminal support unicode characters? (Y/N)" << endl;
+		cout << "For example, is this white pawn (" << u8"\u2659" << ") correctly displayed ? If not, type N." << endl;
+		char unicode;
+		cin >> unicode;
+		if (unicode == 'Y')
+		{
+			unicodeSupported = true;
+			cout << "In this case, the pieces will be displayed as follows:" << endl;
+			cout << "White Pawn: " << u8"\u2659" << endl;
+			cout << "White Rook: " << u8"\u2656" << endl;
+			cout << "White Knight: " << u8"\u2658" << endl;
+			cout << "White Bishop: " << u8"\u2657" << endl;
+			cout << "White Queen: " << u8"\u2655" << endl;
+			cout << "White King: " << u8"\u2654" << endl;
+			cout << "Black Pawn: " << u8"\u265F" << endl;
+			cout << "Black Rook: " << u8"\u265C" << endl;
+			cout << "Black Knight: " << u8"\u265E" << endl;
+			cout << "Black Bishop: " << u8"\u265D" << endl;
+			cout << "Black Queen: " << u8"\u265B" << endl;
+			cout << "Black King: " << u8"\u265A" << endl;
+			cout << "Empty Square: *" << endl;
+		}
+		else
+		{
+			unicodeSupported = false;
+			cout << "In this case, the pieces will be displayed as follows:" << endl;
+			cout << "White Pawn: P" << endl;
+			cout << "White Rook: R" << endl;
+			cout << "White Knight: N" << endl;
+			cout << "White Bishop: S" << endl;
+			cout << "White Queen: Q" << endl;
+			cout << "White King: K" << endl;
+			cout << "Black Pawn: p" << endl;
+			cout << "Black Rook: r" << endl;
+			cout << "Black Knight: n" << endl;
+			cout << "Black Bishop: s" << endl;
+			cout << "Black Queen: q" << endl;
+			cout << "Black King: k" << endl;
+			cout << "Empty Square: *" << endl;
+		}
     }
 	board::board(const board& theboard)
 	{
@@ -35,6 +78,7 @@
 		BlackCastleQueenSideQualified = theboard.BlackCastleQueenSideQualified;
 		MoveHistory = theboard.MoveHistory;
 		mover = theboard.mover;
+		unicodeSupported = theboard.unicodeSupported;
 	}
 	char board::getPieceAt(int row, int col)
 	{
@@ -50,27 +94,80 @@
 		CurBoard[row][col] = '*';
 		return;
 	}
+	void board::PieceCast(char piece)
+	{
+		if (!unicodeSupported)
+		{
+			cout << piece;
+			return;
+		}
+		switch (piece)
+		{
+		case WhitePawn:
+			cout << u8"\u2659";
+			break;
+		case WhiteRook:
+			cout << u8"\u2656";
+			break;
+		case WhiteKnight:
+			cout << u8"\u2658";
+			break;
+		case WhiteBishop:
+			cout << u8"\u2657";
+			break;
+		case WhiteQueen:
+			cout << u8"\u2655";
+			break;
+		case WhiteKing:
+			cout << u8"\u2654";
+			break;
+		case BlackPawn:
+			cout << u8"\u265F";
+			break;
+		case BlackRook:
+			cout << u8"\u265C";
+			break;
+		case BlackKnight:
+			cout << u8"\u265E";
+			break;
+		case BlackBishop:
+			cout << u8"\u265D";
+			break;
+		case BlackQueen:
+			cout << u8"\u265B";
+			break;
+		case BlackKing:
+			cout << u8"\u265A";
+			break;
+		case Empty:
+			cout << '*';
+		}
+		return;
+	}
 	void board::printBoard()
 	{
 		cout << "X A B C D E F G H" << endl;
-		cout << "8 " << CurBoard[8][A] << " " << CurBoard[8][B] << " " << CurBoard[8][C] << " " << CurBoard[8][D] << " " << CurBoard[8][E] << " " << CurBoard[8][F] << " " << CurBoard[8][G] << " " << CurBoard[8][H] << endl;
-		cout << "7 " << CurBoard[7][A] << " " << CurBoard[7][B] << " " << CurBoard[7][C] << " " << CurBoard[7][D] << " " << CurBoard[7][E] << " " << CurBoard[7][F] << " " << CurBoard[7][G] << " " << CurBoard[7][H] << endl;
-		cout << "6 " << CurBoard[6][A] << " " << CurBoard[6][B] << " " << CurBoard[6][C] << " " << CurBoard[6][D] << " " << CurBoard[6][E] << " " << CurBoard[6][F] << " " << CurBoard[6][G] << " " << CurBoard[6][H] << endl;
-		cout << "5 " << CurBoard[5][A] << " " << CurBoard[5][B] << " " << CurBoard[5][C] << " " << CurBoard[5][D] << " " << CurBoard[5][E] << " " << CurBoard[5][F] << " " << CurBoard[5][G] << " " << CurBoard[5][H] << endl;
-		cout << "4 " << CurBoard[4][A] << " " << CurBoard[4][B] << " " << CurBoard[4][C] << " " << CurBoard[4][D] << " " << CurBoard[4][E] << " " << CurBoard[4][F] << " " << CurBoard[4][G] << " " << CurBoard[4][H] << endl;
-		cout << "3 " << CurBoard[3][A] << " " << CurBoard[3][B] << " " << CurBoard[3][C] << " " << CurBoard[3][D] << " " << CurBoard[3][E] << " " << CurBoard[3][F] << " " << CurBoard[3][G] << " " << CurBoard[3][H] << endl;
-		cout << "2 " << CurBoard[2][A] << " " << CurBoard[2][B] << " " << CurBoard[2][C] << " " << CurBoard[2][D] << " " << CurBoard[2][E] << " " << CurBoard[2][F] << " " << CurBoard[2][G] << " " << CurBoard[2][H] << endl;
-		cout << "1 " << CurBoard[1][A] << " " << CurBoard[1][B] << " " << CurBoard[1][C] << " " << CurBoard[1][D] << " " << CurBoard[1][E] << " " << CurBoard[1][F] << " " << CurBoard[1][G] << " " << CurBoard[1][H] << endl;
-		cout << "-----------------" << endl;
+		for (int i = 1; i < 9; i++)
+		{
+			cout << i << " ";
+			for (int j = 1; j < 9; j++)
+			{
+				PieceCast(CurBoard[i][j]);
+				cout << " ";
+			}
+			cout << endl;
+		}
 		cout << "Piece Taken:" << endl;
 		for (int i = 0; i < TakenPieceBlack.size(); i++)
 		{
-			cout << TakenPieceBlack[i] << " ";
+			PieceCast(TakenPieceBlack[i]);
+			cout << " ";
 		}
 		cout << endl;
 		for (int i = 0; i < TakenPieceWhite.size(); i++)
 		{
-			cout << TakenPieceWhite[i] << " ";
+			PieceCast(TakenPieceWhite[i]);
+			cout << " ";
 		}
 		cout << endl;
 
@@ -2979,65 +3076,90 @@
 		if (mover == White)
 		{
 			allPossibleMoves = getAllWhitePossibleMoves();
+			int chance = 1;
+			pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
+			for (int i = 0; i < allPossibleMoves.size(); i++)
+			{
+				board temp = *this;
+				temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
+				if (temp.isBlackCheckmated())
+				{
+					return { allPossibleMoves[i],100000 };
+				}
+				attempt = temp.findWhiteBestMove(depth);
+				if (attempt.second > bestscore)
+				{
+					bestscore = attempt.second;
+					bestMove = allPossibleMoves[i];
+				}
+				else if (attempt.second == bestscore)
+				{
+					if (rand() % chance == 0)
+					{
+						bestMove = allPossibleMoves[i];
+						chance++;
+					}
+				}
+			}
+			return { bestMove,bestscore };
 		}
 		else
 		{
-			allPossibleMoves = getAllBlackPossibleMoves();
+
+			pair<pair<pair<int, int>, pair<int, int>>, int> EnemyBestAttempt = findBlackBestMove(depth - 1);
+			EnemyBestAttempt.second = EnemyBestAttempt.second * -1;
+			return EnemyBestAttempt;
 		}
-		pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
-		for (int i = 0; i < allPossibleMoves.size(); i++)
-		{
-			board temp = *this;
-			temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
-			if (temp.isBlackCheckmated())
-			{
-				return { allPossibleMoves[i],100000 };
-			}
-			attempt = temp.findWhiteBestMove(depth - 1);
-			if (attempt.second > bestscore)
-			{
-				bestscore = attempt.second;
-				bestMove = allPossibleMoves[i];
-			}
-		}
-		return {bestMove,bestscore};
 	}
 	pair<pair<pair<int, int>, pair<int, int>>, int> board::findBlackBestMove(int depth)
 	{
+
 		if (isBlackCheckmated())
 		{
-			return { { {0,0},{0,0} },100000 };
+			return { { {0,0},{0,0} },-100000 };
 		}
 		if (depth == 0)
 		{
 			return { { {0,0},{0,0} },getBlackMaterialAdvantage() };
 		}
 		pair<pair<int, int>, pair<int, int>> bestMove;
-		int bestscore = 100000;
+		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves;
-		if (mover == White)
+		if (mover == Black)
 		{
-			allPossibleMoves = getAllWhitePossibleMoves();
+			allPossibleMoves = getAllBlackPossibleMoves();
+			int chance = 1;
+			pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
+			for (int i = 0; i < allPossibleMoves.size(); i++)
+			{
+				board temp = *this;
+				temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
+				if (temp.isWhiteCheckmated())
+				{
+					return { allPossibleMoves[i],100000 };
+				}
+				attempt = temp.findBlackBestMove(depth - 1);
+				if (attempt.second > bestscore)
+				{
+					bestscore = attempt.second;
+					bestMove = allPossibleMoves[i];
+				}
+				else if (attempt.second == bestscore)
+				{
+					if (rand() % chance == 0)
+					{
+						bestMove = allPossibleMoves[i];
+						chance++;
+					}
+				}
+			}
+			return { bestMove,bestscore };
 		}
 		else
 		{
-			allPossibleMoves = getAllBlackPossibleMoves();
+
+			pair<pair<pair<int, int>, pair<int, int>>, int> EnemyBestAttempt = findWhiteBestMove(depth);
+			EnemyBestAttempt.second = EnemyBestAttempt.second * -1;
+			return EnemyBestAttempt;
 		}
-		pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
-		for (int i = 0; i < allPossibleMoves.size(); i++)
-		{
-			board temp = *this;
-			temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
-			if (temp.isWhiteCheckmated())
-			{
-				return { allPossibleMoves[i],-100000 };
-			}
-			attempt = temp.findBlackBestMove(depth - 1);
-			if (attempt.second < bestscore)
-			{
-				bestscore = attempt.second;
-				bestMove = allPossibleMoves[i];
-			}
-		}
-		return { bestMove,bestscore };
 	}
