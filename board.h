@@ -77,7 +77,7 @@ public:
 	vector<pair<int, int>> getPossibleCastling(int row, int col);
 	vector<pair<pair < int, int>, pair<int, int>> > getAllWhitePossibleMoves();
 	vector<pair<pair < int, int>, pair<int, int>> > getAllBlackPossibleMoves();
-	void move(int row, int col, int newRow, int newCol);
+	bool move(int row, int col, int newRow, int newCol);
 	void moveNoCheck(int row, int col, int newRow, int newCol);
 	pair<pair<int, int>, pair<int, int>> AlgebraicNotationDecoder(string notation, char mover);
 	pair<pair<pair<int, int>, pair<int, int>>, int> findWhiteBestMove(int depth);

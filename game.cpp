@@ -234,10 +234,8 @@ static pair<pair<int, int>, pair<int, int>> AskForMove()
 	int newRow;
 	int newCol;
 	bool moveIsLegal = false;
-	cout << "Enter row and col of the piece you want to move (e.g., 2d, 2D, d2, or D2)," << endl;
-	cout << "You may also enter the piece location and target location at the same time, like \"2d 4d\" means move the piece on 2d to 4d." << endl;
+	cout <<"Enter the location of your piece and target (e.g. 2D 4D)" << endl;
 	cin >> piece;
-	cout << "Enter row and col of the square you want to move to(e.g., 4d, 4D, d4, or D4)" << endl;
 	cin >> target;
 	try
 	{
@@ -301,6 +299,8 @@ static void PlayWithComputer(int depth)
 	cin >> depth;
 	if (user == 'W')
 	{
+		system("cls");
+		theboard.printBoard();
 		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
 		{
 			if (theboard.mover == Black)
@@ -316,13 +316,18 @@ static void PlayWithComputer(int depth)
 				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
 				system("cls");
 				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
-				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				if (!theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second))
+				{
+					userMove = AskForMove();
+					theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				}
 				theboard.printBoard();
 			}
 		}
 	}
 	else
 	{
+		system("cls");
 		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
 		{
 			if (theboard.mover == White)
@@ -339,7 +344,11 @@ static void PlayWithComputer(int depth)
 				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
 				system("cls");
 				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
-				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				if (!theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second))
+				{
+					userMove = AskForMove();
+					theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				}
 				theboard.printBoard();
 			}
 		}

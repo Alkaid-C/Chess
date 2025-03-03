@@ -2836,7 +2836,7 @@
 		return result;
 	}
 
-	void board::move(int row, int col, int newRow, int newCol)
+	bool board::move(int row, int col, int newRow, int newCol)
 	{
 		vector<pair<int, int>> possibleMoves = getPossibleMoves(row, col);
 		bool isRegularMove = false;
@@ -2949,12 +2949,13 @@
 				else
 				{
 					cout << "Invalid Move" << endl;
-					throw "Invalid Move";
+					return false;
 				}
 			}
 		}
 		mover = !mover;
 		MoveHistory.push_back({ {row,col},{newRow,newCol} });
+		return true;
 	}
 	void board::moveNoCheck(int row, int col, int newRow, int newCol)
 	{
