@@ -73,9 +73,12 @@ public:
 	vector<pair<int, int>> getPossibleMoves(int row, int col);
 	vector<pair<int, int>> getPossibleEnPassant(int row, int col);
 	vector<pair<int, int>> getPossibleCastling(int row, int col);
+	vector<pair<pair < int, int>, pair<int, int>> > getAllWhitePossibleMoves();
+	vector<pair<pair < int, int>, pair<int, int>> > getAllBlackPossibleMoves();
 	void move(int row, int col, int newRow, int newCol);
 	void moveNoCheck(int row, int col, int newRow, int newCol);
 	pair<pair<int, int>, pair<int, int>> AlgebraicNotationDecoder(string notation, char mover);
-	
+	pair<pair<pair<int, int>, pair<int, int>>, int> findWhiteBestMove(int depth);
+	pair<pair<pair<int, int>, pair<int, int>>, int> findBlackBestMove(int depth); 
 };
 #endif // !BOARD_H

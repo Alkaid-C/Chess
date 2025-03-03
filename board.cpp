@@ -2680,6 +2680,65 @@
 		}
 		return result;
 	}
+	vector<pair<pair < int, int>, pair<int, int>> > board::getAllWhitePossibleMoves()
+	{
+		vector<pair<pair < int, int>, pair<int, int>> > result;
+		for (int i = 1; i < 9; i++)
+		{
+			for (int j = 1; j < 9; j++)
+			{
+				if (isWhite(i, j))
+				{
+					vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
+					vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j); 
+					vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
+					for (int k = 0; k < possibleMoves.size(); k++)
+					{
+						result.push_back({ {i,j},possibleMoves[k] });
+					}
+					for (int k = 0; k < possibleEnPassant.size(); k++)
+					{
+						result.push_back({ {i,j},possibleEnPassant[k] });
+					}
+					for (int k = 0; k < possibleCastling.size(); k++)
+					{
+						result.push_back({ {i,j},possibleCastling[k] });
+					}
+				}
+			}
+		}
+		return result;
+	}
+	vector<pair<pair < int, int>, pair<int, int>> > board::getAllBlackPossibleMoves()
+	{
+		vector<pair<pair < int, int>, pair<int, int>> > result;
+		for (int i = 1; i < 9; i++)
+		{
+			for (int j = 1; j < 9; j++)
+			{
+				if (isBlack(i, j))
+				{
+					vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
+					vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j);
+					vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
+					for (int k = 0; k < possibleMoves.size(); k++)
+					{
+						result.push_back({ {i,j},possibleMoves[k] });
+					}
+					for (int k = 0; k < possibleEnPassant.size(); k++)
+					{
+						result.push_back({ {i,j},possibleEnPassant[k] });
+					}
+					for (int k = 0; k < possibleCastling.size(); k++)
+					{
+						result.push_back({ {i,j},possibleCastling[k] });
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 	void board::move(int row, int col, int newRow, int newCol)
 	{
 		vector<pair<int, int>> possibleMoves = getPossibleMoves(row, col);
@@ -2797,6 +2856,7 @@
 			}
 		}
 		mover = !mover;
+		MoveHistory.push_back({ {row,col},{newRow,newCol} });
 	}
 	void board::moveNoCheck(int row, int col, int newRow, int newCol)
 	{
@@ -2898,4 +2958,85 @@
 				CurBoard[row][col] = Empty;
 			}
 		}
+		MoveHistory.push_back({ {row,col},{newRow,newCol} });
+		mover = !mover;
+		return;
+	}
+	pair<pair<pair<int, int>, pair<int, int>>, int> board::findWhiteBestMove(int depth)
+	{
+		if (isWhiteCheckmated())
+		{
+			return { { {0,0},{0,0} },-100000 };
+		}
+		if (depth == 0)
+		{
+			return { { {0,0},{0,0} },getWhiteMaterialAdvantage()};
+		}
+		pair<pair<int, int>, pair<int, int>> bestMove;
+		int bestscore = -100000;
+		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves;
+		if (mover == White)
+		{
+			allPossibleMoves = getAllWhitePossibleMoves();
+		}
+		else
+		{
+			allPossibleMoves = getAllBlackPossibleMoves();
+		}
+		pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
+		for (int i = 0; i < allPossibleMoves.size(); i++)
+		{
+			board temp = *this;
+			temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
+			if (temp.isBlackCheckmated())
+			{
+				return { allPossibleMoves[i],100000 };
+			}
+			attempt = temp.findWhiteBestMove(depth - 1);
+			if (attempt.second > bestscore)
+			{
+				bestscore = attempt.second;
+				bestMove = allPossibleMoves[i];
+			}
+		}
+		return {bestMove,bestscore};
+	}
+	pair<pair<pair<int, int>, pair<int, int>>, int> board::findBlackBestMove(int depth)
+	{
+		if (isBlackCheckmated())
+		{
+			return { { {0,0},{0,0} },100000 };
+		}
+		if (depth == 0)
+		{
+			return { { {0,0},{0,0} },getBlackMaterialAdvantage() };
+		}
+		pair<pair<int, int>, pair<int, int>> bestMove;
+		int bestscore = 100000;
+		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves;
+		if (mover == White)
+		{
+			allPossibleMoves = getAllWhitePossibleMoves();
+		}
+		else
+		{
+			allPossibleMoves = getAllBlackPossibleMoves();
+		}
+		pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
+		for (int i = 0; i < allPossibleMoves.size(); i++)
+		{
+			board temp = *this;
+			temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
+			if (temp.isWhiteCheckmated())
+			{
+				return { allPossibleMoves[i],-100000 };
+			}
+			attempt = temp.findBlackBestMove(depth - 1);
+			if (attempt.second < bestscore)
+			{
+				bestscore = attempt.second;
+				bestMove = allPossibleMoves[i];
+			}
+		}
+		return { bestMove,bestscore };
 	}

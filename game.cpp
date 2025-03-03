@@ -4,12 +4,38 @@
 static void testGame1();
 static void testGame2();
 static void testGame3();
+static void testGame4();
 static void twoPlayerGame();
+char static ColCast(int col);
 
 int main()
 {
-	twoPlayerGame();
+	testGame3();
 }
+
+char static ColCast(int col)
+{
+	switch (col)
+	{
+	case 1:
+		return 'A';
+	case 2:
+		return 'B';
+	case 3:
+		return 'C';
+	case 4:
+		return 'D';
+	case 5:
+		return 'E';
+	case 6:
+		return 'F';
+	case 7:
+		return 'G';
+	case 8:
+		return 'H';
+	}
+}
+
 static void testGame1()
 {
 	board theboard;
@@ -144,11 +170,31 @@ static void testGame3()
 	theboard.printBoard();
 	theboard.move(8, C, 7, D);
 	theboard.printBoard();
+	pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findWhiteBestMove(4);
+	cout << "best move is:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->"<< bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
 	theboard.move(5, B, 4, C);
 	theboard.printBoard();
 	theboard.move(8, B, 6, C);
 	theboard.printBoard();
-	theboard.move(5, H, 7, F);
+	bestMove = theboard.findWhiteBestMove(4);
+	cout << "best move is:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
+	theboard.move(4, C, 7, 6);
+	theboard.printBoard();
+	return;
+}
+static void testGame4()
+{
+	board theboard;
+	theboard.printBoard();
+	theboard.move(2, D, 4, D);
+	theboard.printBoard();
+	theboard.move(7, A, 6, A);
+	theboard.printBoard();
+	theboard.move(4, D, 5, D);
+	theboard.printBoard();
+	theboard.move(7, E, 5, E);
+	theboard.printBoard();
+	theboard.move(5, D, 6, E);
 	theboard.printBoard();
 	return;
 }
