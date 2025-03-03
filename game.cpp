@@ -9,9 +9,12 @@ static void twoPlayerGame();
 char static ColCast(int col);
 static pair<pair<int, int>, pair<int, int>> AskForMove();
 
+static void PlayWithComputer(int depth);
+
 int main()
 {
-	twoPlayerGame();
+
+	PlayWithComputer(4);
 }
 
 char static ColCast(int col)
@@ -286,4 +289,50 @@ static pair<pair<int, int>, pair<int, int>> AskForMove()
 		cout << "Invalid input, please try again" << endl;
 		return AskForMove();
 	}
+}
+
+static void PlayWithComputer(int depth)
+{
+	board theboard;
+	theboard.printBoard();
+	cout << "You want to play: (B/W)" << endl;
+	char user;
+	cin >> user;
+	if (user == 'B')
+	{
+		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+		{
+			if (theboard.mover == Black)
+			{
+				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findBlackBestMove(depth);
+				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
+				theboard.printBoard();
+			}
+			else
+			{
+				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				theboard.printBoard();
+			}
+		}
+	}
+	else
+	{
+		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+		{
+			if (theboard.mover == White)
+			{
+				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findWhiteBestMove(depth);
+				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
+				theboard.printBoard();
+			}
+			else
+			{
+				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+				theboard.printBoard();
+			}
+		}
+	}
+	cout << "Game Over" << endl;
 }

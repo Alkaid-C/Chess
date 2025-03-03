@@ -2851,6 +2851,7 @@
 				}
 				else
 				{
+					cout << "Invalid Move" << endl;
 					throw "Invalid Move";
 				}
 			}
