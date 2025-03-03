@@ -7,10 +7,11 @@ static void testGame3();
 static void testGame4();
 static void twoPlayerGame();
 char static ColCast(int col);
+static pair<pair<int, int>, pair<int, int>> AskForMove();
 
 int main()
 {
-	testGame3();
+	twoPlayerGame();
 }
 
 char static ColCast(int col)
@@ -202,12 +203,6 @@ static void testGame4()
 static void twoPlayerGame()
 {
 	board theboard;
-	string piece;
-	string target;
-	int row;
-	int col;
-	int newRow;
-	int newCol;
 	theboard.printBoard();
 	while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
 	{
@@ -219,16 +214,36 @@ static void twoPlayerGame()
 		{
 			cout << "Black's turn" << endl;
 		}
-		cout << "Enter row and col of the piece you want to move (e.g., 2d, 2D, d2, or D2)," << endl;
-		cout << "You may also enter the piece location and target location at the same time, like \"2d 4d\" means move the piece on 2d to 4d." << endl;
-		cin >> piece;
-		cout << "Enter row and col of the square you want to move to(e.g., 4d, 4D, d4, or D4)" << endl;
-		cin >>target;
+		pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+		theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
+		theboard.printBoard();
+	}
+	theboard.printBoard();
+	return;
+}
+
+
+static pair<pair<int, int>, pair<int, int>> AskForMove()
+{
+	string piece;
+	string target;
+	int row;
+	int col;
+	int newRow;
+	int newCol;
+	bool moveIsLegal = false;
+	cout << "Enter row and col of the piece you want to move (e.g., 2d, 2D, d2, or D2)," << endl;
+	cout << "You may also enter the piece location and target location at the same time, like \"2d 4d\" means move the piece on 2d to 4d." << endl;
+	cin >> piece;
+	cout << "Enter row and col of the square you want to move to(e.g., 4d, 4D, d4, or D4)" << endl;
+	cin >> target;
+	try
+	{
 		if (isdigit(piece[0]))
 		{
 			row = piece[0] - '0';
-			col = piece[1] - 'A'+1;
-			if (col > 8 || col <0)
+			col = piece[1] - 'A' + 1;
+			if (col > 8 || col < 0)
 			{
 				col = piece[1] - 'a' + 1;
 			}
@@ -260,9 +275,15 @@ static void twoPlayerGame()
 				newCol = target[0] - 'a' + 1;
 			}
 		}
-		theboard.move(row, col, newRow, newCol);
-		theboard.printBoard();
+		if (row > 8 || row < 1 || col > 8 || col < 1 || newRow > 8 || newRow < 1 || newCol > 8 || newCol < 1)
+		{
+			throw "Invalid Move";
+		}
+		return { {row,col},{newRow,newCol} };
 	}
-	theboard.printBoard();
-	return;
+	catch (...)
+	{
+		cout << "Invalid input, please try again" << endl;
+		return AskForMove();
+	}
 }
