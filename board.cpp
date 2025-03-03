@@ -1,6 +1,8 @@
 ﻿
 #include "board.h"
 #include <iostream>
+#include <thread>
+#include <cmath>
 
 #pragma execution_character_set("utf-8")
     board::board()
@@ -25,6 +27,27 @@
         BlackCastleQueenSideQualified = true;
 		MoveHistory = {};
 		mover = White;
+		unicodeSupported = false;
+    }
+	board::board(const board& theboard)
+	{
+		CurBoard = theboard.CurBoard;
+		TakenPieceBlack = theboard.TakenPieceBlack;
+		TakenPieceWhite = theboard.TakenPieceWhite;
+		WhiteCastleKingSideQualified = theboard.WhiteCastleKingSideQualified;
+		WhiteCastleQueenSideQualified = theboard.WhiteCastleQueenSideQualified;
+		BlackCastleKingSideQualified = theboard.BlackCastleKingSideQualified;
+		BlackCastleQueenSideQualified = theboard.BlackCastleQueenSideQualified;
+		MoveHistory = theboard.MoveHistory;
+		mover = theboard.mover;
+		unicodeSupported = theboard.unicodeSupported;
+	}
+	void board::setUnicodeSupported(bool support)
+	{
+		unicodeSupported = support;
+	}
+	void board::PromptForUnicodeSupport()
+	{
 		system("chcp 65001");
 		cout << "Does your terminal support unicode characters? (Y/N)" << endl;
 		cout << "For example, is this white pawn (" << u8"\u2659" << ") correctly displayed ? If not, type N." << endl;
@@ -66,19 +89,6 @@
 			cout << "Black King: k" << endl;
 			cout << "Empty Square: *" << endl;
 		}
-    }
-	board::board(const board& theboard)
-	{
-		CurBoard = theboard.CurBoard;
-		TakenPieceBlack = theboard.TakenPieceBlack;
-		TakenPieceWhite = theboard.TakenPieceWhite;
-		WhiteCastleKingSideQualified = theboard.WhiteCastleKingSideQualified;
-		WhiteCastleQueenSideQualified = theboard.WhiteCastleQueenSideQualified;
-		BlackCastleKingSideQualified = theboard.BlackCastleKingSideQualified;
-		BlackCastleQueenSideQualified = theboard.BlackCastleQueenSideQualified;
-		MoveHistory = theboard.MoveHistory;
-		mover = theboard.mover;
-		unicodeSupported = theboard.unicodeSupported;
 	}
 	char board::getPieceAt(int row, int col)
 	{
@@ -2835,7 +2845,6 @@
 		}
 		return result;
 	}
-
 	bool board::move(int row, int col, int newRow, int newCol)
 	{
 		vector<pair<int, int>> possibleMoves = getPossibleMoves(row, col);
@@ -3063,104 +3072,282 @@
 	}
 	pair<pair<pair<int, int>, pair<int, int>>, int> board::findWhiteBestMove(int depth)
 	{
-		if (isWhiteCheckmated())
-		{
-			return { { {0,0},{0,0} },-100000 };
-		}
-		if (depth == 0)
-		{
-			return { { {0,0},{0,0} },getWhiteMaterialAdvantage()};
-		}
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
-		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves;
-		if (mover == White)
+		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllWhitePossibleMoves();
+		pair<pair<int, int>, pair<int, int>> BestMoveT1;
+		pair<pair<int, int>, pair<int, int>> BestMoveT2;
+		pair<pair<int, int>, pair<int, int>> BestMoveT3;
+		pair<pair<int, int>, pair<int, int>> BestMoveT4;
+		pair<pair<int, int>, pair<int, int>> BestMoveT5;
+		pair<pair<int, int>, pair<int, int>> BestMoveT6;
+		pair<pair<int, int>, pair<int, int>> BestMoveT7;
+		pair<pair<int, int>, pair<int, int>> BestMoveT8;
+		int bestScoreT1;
+		int bestScoreT2;
+		int bestScoreT3;
+		int bestScoreT4;
+		int bestScoreT5;
+		int bestScoreT6;
+		int bestScoreT7;
+		int bestScoreT8;
+		int base = allPossibleMoves.size();
+		if (base > 8)
 		{
-			allPossibleMoves = getAllWhitePossibleMoves();
-			int chance = 1;
-			pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
-			for (int i = 0; i < allPossibleMoves.size(); i++)
-			{
-				board temp = *this;
-				temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
-				if (temp.isBlackCheckmated())
-				{
-					return { allPossibleMoves[i],100000 };
-				}
-				attempt = temp.findWhiteBestMove(depth);
-				if (attempt.second > bestscore)
-				{
-					bestscore = attempt.second;
-					bestMove = allPossibleMoves[i];
-				}
-				else if (attempt.second == bestscore)
-				{
-					if (rand() % chance == 0)
-					{
-						bestMove = allPossibleMoves[i];
-						chance++;
-					}
-				}
+			double factor = static_cast<double>(base) / 8.0;
+			std::thread t1(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
+			std::thread t2(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
+			std::thread t3(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
+			std::thread t4(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT4), std::ref(bestScoreT4), std::ref(allPossibleMoves), std::round(3.0 * factor), std::round(4.0 * factor), depth);
+			std::thread t5(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT5), std::ref(bestScoreT5), std::ref(allPossibleMoves), std::round(4.0 * factor), std::round(5.0 * factor), depth);
+			std::thread t6(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT6), std::ref(bestScoreT6), std::ref(allPossibleMoves), std::round(5.0 * factor), std::round(6.0 * factor), depth);
+			std::thread t7(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT7), std::ref(bestScoreT7), std::ref(allPossibleMoves), std::round(6.0 * factor), std::round(7.0 * factor), depth);
+			std::thread t8(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT8), std::ref(bestScoreT8), std::ref(allPossibleMoves), std::round(7.0 * factor), allPossibleMoves.size(), depth);
+
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+			t5.join();
+			t6.join();
+			t7.join();
+			t8.join();
+
+			// Determine the best move from the results of all threads
+			bestMove = BestMoveT1;
+			bestscore = bestScoreT1;
+
+			if (bestScoreT2 > bestscore) {
+				bestMove = BestMoveT2;
+				bestscore = bestScoreT2;
 			}
-			return { bestMove,bestscore };
+			if (bestScoreT3 > bestscore) {
+				bestMove = BestMoveT3;
+				bestscore = bestScoreT3;
+			}
+			if (bestScoreT4 > bestscore) {
+				bestMove = BestMoveT4;
+				bestscore = bestScoreT4;
+			}
+			if (bestScoreT5 > bestscore) {
+				bestMove = BestMoveT5;
+				bestscore = bestScoreT5;
+			}
+			if (bestScoreT6 > bestscore) {
+				bestMove = BestMoveT6;
+				bestscore = bestScoreT6;
+			}
+			if (bestScoreT7 > bestscore) {
+				bestMove = BestMoveT7;
+				bestscore = bestScoreT7;
+			}
+			if (bestScoreT8 > bestscore) {
+				bestMove = BestMoveT8;
+				bestscore = bestScoreT8;
+			}
+
+			return { bestMove, bestscore };
+
 		}
 		else
 		{
-
-			pair<pair<pair<int, int>, pair<int, int>>, int> EnemyBestAttempt = findBlackBestMove(depth - 1);
-			EnemyBestAttempt.second = EnemyBestAttempt.second * -1;
-			return EnemyBestAttempt;
+			findWhiteBestMoveCore(BestMoveT1, bestScoreT1, allPossibleMoves, 0, base, depth);
+			return { BestMoveT1,bestScoreT1 };
 		}
 	}
 	pair<pair<pair<int, int>, pair<int, int>>, int> board::findBlackBestMove(int depth)
 	{
-
-		if (isBlackCheckmated())
-		{
-			return { { {0,0},{0,0} },-100000 };
-		}
-		if (depth == 0)
-		{
-			return { { {0,0},{0,0} },getBlackMaterialAdvantage() };
-		}
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
-		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves;
-		if (mover == Black)
+		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllBlackPossibleMoves();
+		pair<pair<int, int>, pair<int, int>> BestMoveT1;
+		pair<pair<int, int>, pair<int, int>> BestMoveT2;
+		pair<pair<int, int>, pair<int, int>> BestMoveT3;
+		pair<pair<int, int>, pair<int, int>> BestMoveT4;
+		pair<pair<int, int>, pair<int, int>> BestMoveT5;
+		pair<pair<int, int>, pair<int, int>> BestMoveT6;
+		pair<pair<int, int>, pair<int, int>> BestMoveT7;
+		pair<pair<int, int>, pair<int, int>> BestMoveT8;
+		int bestScoreT1;
+		int bestScoreT2;
+		int bestScoreT3;
+		int bestScoreT4;
+		int bestScoreT5;
+		int bestScoreT6;
+		int bestScoreT7;
+		int bestScoreT8;
+		int base = allPossibleMoves.size();
+		if (base > 8)
 		{
-			allPossibleMoves = getAllBlackPossibleMoves();
-			int chance = 1;
-			pair<pair<pair<int, int>, pair<int, int>>, int> attempt;
-			for (int i = 0; i < allPossibleMoves.size(); i++)
-			{
-				board temp = *this;
-				temp.moveNoCheck(allPossibleMoves[i].first.first, allPossibleMoves[i].first.second, allPossibleMoves[i].second.first, allPossibleMoves[i].second.second);
-				if (temp.isWhiteCheckmated())
-				{
-					return { allPossibleMoves[i],100000 };
-				}
-				attempt = temp.findBlackBestMove(depth - 1);
-				if (attempt.second > bestscore)
-				{
-					bestscore = attempt.second;
-					bestMove = allPossibleMoves[i];
-				}
-				else if (attempt.second == bestscore)
-				{
-					if (rand() % chance == 0)
-					{
-						bestMove = allPossibleMoves[i];
-						chance++;
-					}
-				}
+			double factor = static_cast<double>(base) / 8.0;
+			std::thread t1(&board::findBlackBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
+			std::thread t2(&board::findBlackBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
+			std::thread t3(&board::findBlackBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
+			std::thread t4(&board::findBlackBestMoveCore, this, std::ref(BestMoveT4), std::ref(bestScoreT4), std::ref(allPossibleMoves), std::round(3.0 * factor), std::round(4.0 * factor), depth);
+			std::thread t5(&board::findBlackBestMoveCore, this, std::ref(BestMoveT5), std::ref(bestScoreT5), std::ref(allPossibleMoves), std::round(4.0 * factor), std::round(5.0 * factor), depth);
+			std::thread t6(&board::findBlackBestMoveCore, this, std::ref(BestMoveT6), std::ref(bestScoreT6), std::ref(allPossibleMoves), std::round(5.0 * factor), std::round(6.0 * factor), depth);
+			std::thread t7(&board::findBlackBestMoveCore, this, std::ref(BestMoveT7), std::ref(bestScoreT7), std::ref(allPossibleMoves), std::round(6.0 * factor), std::round(7.0 * factor), depth);
+			std::thread t8(&board::findBlackBestMoveCore, this, std::ref(BestMoveT8), std::ref(bestScoreT8), std::ref(allPossibleMoves), std::round(7.0 * factor), allPossibleMoves.size(), depth);
+
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+			t5.join();
+			t6.join();
+			t7.join();
+			t8.join();
+
+			// Determine the best move from the results of all threads
+			bestMove = BestMoveT1;
+			bestscore = bestScoreT1;
+
+			if (bestScoreT2 > bestscore) {
+				bestMove = BestMoveT2;
+				bestscore = bestScoreT2;
 			}
-			return { bestMove,bestscore };
+			if (bestScoreT3 > bestscore) {
+				bestMove = BestMoveT3;
+				bestscore = bestScoreT3;
+			}
+			if (bestScoreT4 > bestscore) {
+				bestMove = BestMoveT4;
+				bestscore = bestScoreT4;
+			}
+			if (bestScoreT5 > bestscore) {
+				bestMove = BestMoveT5;
+				bestscore = bestScoreT5;
+			}
+			if (bestScoreT6 > bestscore) {
+				bestMove = BestMoveT6;
+				bestscore = bestScoreT6;
+			}
+			if (bestScoreT7 > bestscore) {
+				bestMove = BestMoveT7;
+				bestscore = bestScoreT7;
+			}
+			if (bestScoreT8 > bestscore) {
+				bestMove = BestMoveT8;
+				bestscore = bestScoreT8;
+			}
+
+			return { bestMove, bestscore };
+
 		}
 		else
 		{
-
-			pair<pair<pair<int, int>, pair<int, int>>, int> EnemyBestAttempt = findWhiteBestMove(depth);
-			EnemyBestAttempt.second = EnemyBestAttempt.second * -1;
-			return EnemyBestAttempt;
+			findBlackBestMoveCore(BestMoveT1, bestScoreT1, allPossibleMoves, 0, base, depth);
+			return { BestMoveT1,bestScoreT1 };
 		}
+	}
+	int board::findWhiteBestScore(int depth)
+	{
+		if (depth == 0) 
+		{
+			return getWhiteMaterialAdvantage();
+		}
+		if (isBlackCheckmated())
+		{
+			return 100000;
+		}
+		if (isWhiteCheckmated())
+		{
+			return -100000;
+		}
+		const vector<pair<pair<int, int>, pair<int, int>>> allPossibleMoves = getAllWhitePossibleMoves();
+		int bestScore = -100000;
+		int attempt;
+		for (const pair<pair<int, int>, pair<int, int>> move : allPossibleMoves)
+		{
+			board temp = *this;
+			temp.moveNoCheck(move.first.first, move.first.second, move.second.first, move.second.second);
+			attempt = -1 * temp.findBlackBestScore(depth - 1);
+			if (attempt > bestScore)
+			{
+				bestScore = attempt;
+			}
+		}
+		return bestScore;
+	}
+	int board::findBlackBestScore(int depth) 
+	{
+		if (depth == 0)
+		{
+			return getWhiteMaterialAdvantage();
+		}
+		if (isWhiteCheckmated())
+		{
+			return 100000;
+		}
+		if (isBlackCheckmated())
+		{
+			return -100000;
+		}
+		const vector<pair<pair<int, int>, pair<int, int>>> allPossibleMoves = getAllBlackPossibleMoves();
+		int bestScore = -100000;
+		int attempt;
+		for (const pair<pair<int, int>, pair<int, int>> move : allPossibleMoves)
+		{
+			board temp = *this;
+			temp.moveNoCheck(move.first.first, move.first.second, move.second.first, move.second.second);
+			attempt = -1 * temp.findWhiteBestScore(depth - 1);
+			if (attempt > bestScore)
+			{
+				bestScore = attempt;
+			}
+		}
+		return bestScore;
+	}
+
+	void board::findBlackBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
+	{
+		bestScoreT = -100000;
+		int attempt;
+		for (begin; begin < end; begin++)
+		{
+			board temp = *this;
+			temp.moveNoCheck(PossibleMoves[begin].first.first, PossibleMoves[begin].first.second, PossibleMoves[begin].second.first, PossibleMoves[begin].second.second);
+			if (temp.isWhiteCheckmated())
+			{
+				BestMoveT = PossibleMoves[begin];
+				bestScoreT = 100000;
+				return;
+			}
+			else
+			{
+				attempt = -1* temp.findWhiteBestScore(depth-1);
+				if (attempt > bestScoreT)
+				{
+					bestScoreT = attempt;
+					BestMoveT = PossibleMoves[begin];
+				}
+			}
+		}
+		return;
+	}
+	void board::findWhiteBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
+	{
+		bestScoreT = -100000;
+		int attempt;
+		for (begin; begin < end; begin++)
+		{
+			board temp = *this;
+			temp.moveNoCheck(PossibleMoves[begin].first.first, PossibleMoves[begin].first.second, PossibleMoves[begin].second.first, PossibleMoves[begin].second.second);
+			if (temp.isBlackCheckmated())
+			{
+				BestMoveT = PossibleMoves[begin];
+				bestScoreT = 100000;
+				return;
+			}
+			else
+			{
+				attempt = -1 * temp.findBlackBestScore(depth - 1);
+				if (attempt > bestScoreT)
+				{
+					bestScoreT = attempt;
+					BestMoveT = PossibleMoves[begin];
+				}
+			}
+		}
+		return;
 	}

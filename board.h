@@ -48,6 +48,8 @@ public:
 	vector<pair<pair<int, int>, pair<int, int>>> MoveHistory;
 	board();
 	board(const board& theboard);
+	void setUnicodeSupported(bool support);
+	void PromptForUnicodeSupport();
 	char getPieceAt(int row, int col);
 	void setPieceAt(int row, int col, char newPiece);
 	void removePiece(int row, int col);
@@ -82,5 +84,9 @@ public:
 	pair<pair<int, int>, pair<int, int>> AlgebraicNotationDecoder(string notation, char mover);
 	pair<pair<pair<int, int>, pair<int, int>>, int> findWhiteBestMove(int depth);
 	pair<pair<pair<int, int>, pair<int, int>>, int> findBlackBestMove(int depth); 
+	int findWhiteBestScore(int depth);
+	int findBlackBestScore(int depth);
+	void findBlackBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth);
+	void findWhiteBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth);
 };
 #endif // !BOARD_H
