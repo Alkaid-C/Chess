@@ -3075,6 +3075,18 @@
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllWhitePossibleMoves();
+		cout << allPossibleMoves.size()<<endl;
+		if (depth == 0)
+		{
+			if (allPossibleMoves.size() > 32)
+			{
+				depth = 4;
+			}
+			else
+			{
+				depth = 5;
+			}
+		}
 		pair<pair<int, int>, pair<int, int>> BestMoveT1;
 		pair<pair<int, int>, pair<int, int>> BestMoveT2;
 		pair<pair<int, int>, pair<int, int>> BestMoveT3;
@@ -3160,6 +3172,17 @@
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllBlackPossibleMoves();
+		if (depth == 0)
+		{
+			if (allPossibleMoves.size() > 32)
+			{
+				depth = 4;
+			}
+			else
+			{
+				depth = 5;
+			}
+		}
 		pair<pair<int, int>, pair<int, int>> BestMoveT1;
 		pair<pair<int, int>, pair<int, int>> BestMoveT2;
 		pair<pair<int, int>, pair<int, int>> BestMoveT3;

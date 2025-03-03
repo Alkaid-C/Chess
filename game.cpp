@@ -11,13 +11,13 @@ static void testGame4();
 static void twoPlayerGame();
 char static ColCast(int col);
 static pair<pair<int, int>, pair<int, int>> AskForMove();
-static void PlayWithComputer(int depth);
+static void PlayWithComputer();
 
 static void RunTimeBenchmark();
 
 int main()
 {
-	RunTimeBenchmark();
+	PlayWithComputer();
 }
 
 char static ColCast(int col)
@@ -292,12 +292,13 @@ static pair<pair<int, int>, pair<int, int>> AskForMove()
 	}
 }
 
-static void PlayWithComputer(int depth)
+static void PlayWithComputer()
 {
+	int depth;
 	board theboard;
 	theboard.PromptForUnicodeSupport();
 	theboard.printBoard();
-	cout << "Computer Smarterness: (Recommended is  4. If you set it to 5, it will take up to a minute or so to compute each step. Set it to 6 or above will take even more.)" << endl;
+	cout << "Computer Smarterness: (Recommended is  4. If you set it to 5, it will take several minutes to compute in complex situation. Type 0 for dynamic depth, which will think 5 steps in simple situation and 4 steps in complex situation to keep compute time no more than a minute)" << endl;
 	cin >> depth;
 	cout << "You want to play: (B/W)" << endl;
 	char user;
