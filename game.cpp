@@ -13,12 +13,35 @@ static void twoPlayerGame();
 char static ColCast(int col);
 static pair<pair<int, int>, pair<int, int>> AskForMove();
 static void PlayWithComputer();
-
-static void RunTimeBenchmark();
+static void RunTimeBenchmark(int depth, int round);
 
 int main()
 {
-	RunTimeBenchmark();
+	cout << "Do you want to..." << endl;
+	cout << "1) play two player game" << endl;
+	cout << "2) play with computer" << endl;
+	cout << "3) Run Benchmark" << endl;
+	cout << "type 1 or 2 or 3 to begin." << endl;
+	int choice;
+	cin >> choice;
+	if (choice == 1)
+	{
+		twoPlayerGame();
+	}
+	if (choice == 2)
+	{
+		PlayWithComputer;
+	}
+	if (choice == 3)
+	{
+		int depth=5;
+		cout << "You want to run benckmark with depth...(Recommendation: 4 or 5)" << endl;
+		cin >> depth;
+		int round=1;
+		cout << "You want to repeat benckmark for how many rounds?" << endl;
+		cin >> round;
+		RunTimeBenchmark(depth, round);
+	}
 }
 
 char static ColCast(int col)
@@ -376,19 +399,18 @@ static void PlayWithComputer()
 	}
 	cout << "Game Over" << endl;
 }
-static void RunTimeBenchmark()
+static void RunTimeBenchmark(int depth, int round)
 {
-	int depth = 5;
-	int round = 1;
+
 	using namespace std::chrono;
 	duration<double> currrent1, currrent2, currrent3, currrent4;
 	high_resolution_clock::time_point begin;
 	high_resolution_clock::time_point finish;
 
-
+	system("cls");
 	for (int i = 0; i < round; i++)
 	{
-        cout << "Benchmarking..." << i + 1 << "/" << round + 1 << endl;
+        cout << "Benchmarking..." << i + 1 << "/" << round << endl;
 		board testBoard;
 		testBoard.move(2, D, 4, D);
 		testBoard.move(7, D, 5, D);
@@ -396,13 +418,13 @@ static void RunTimeBenchmark()
 		begin = high_resolution_clock::now();
 		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
+		cout << "test 1 of 4 done." << endl;
 		currrent1 += duration_cast<duration<double>>(finish - begin) / round;
-		
 		testBoard.move(8, C, 6, E);
 		begin = high_resolution_clock::now();
 		testBoard.findWhiteBestMove(depth);
-
 		finish = high_resolution_clock::now();
+		cout << "test 2 of 4 done. The rest may take longer to run." << endl;
 		currrent2 += duration_cast<duration<double>>(finish - begin) / round;
 
 
@@ -418,22 +440,23 @@ static void RunTimeBenchmark()
 		testBoard.move(7, G, 6, G);
 		begin = high_resolution_clock::now();
 		testBoard.findWhiteBestMove(depth);
-
 		finish = high_resolution_clock::now();
+		cout << "test 3 of 4 done." << endl;
 		currrent3 += duration_cast<duration<double>>(finish - begin) / round;
 		testBoard.move(2, C, 3, C);
-
-
 		begin = high_resolution_clock::now();
 		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
+		cout << "test 4 of 4 done." << endl;
 		currrent4 += duration_cast<duration<double>>(finish - begin) / round;
 		if (i< round-1)
 		{ 
 			cout << "Waiting..." << endl;
 			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
+		system("cls");
 	}
+	system("cls");
 	cout << "Benchmark Resutl:" << endl;
 	cout << "Board1(B): " << currrent1.count() << "s" << endl;
 	cout << "Board2(W): " << currrent2.count() << "s" << endl;
