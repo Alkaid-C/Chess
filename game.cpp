@@ -4,6 +4,7 @@
 #include <ratio>
 #include <chrono>
 #include <thread>
+
 static void testGame1();
 static void testGame2();
 static void testGame3();
@@ -17,7 +18,7 @@ static void RunTimeBenchmark();
 
 int main()
 {
-	PlayWithComputer();
+	RunTimeBenchmark();
 }
 
 char static ColCast(int col)
@@ -364,55 +365,67 @@ static void PlayWithComputer()
 static void RunTimeBenchmark()
 {
 	using namespace std::chrono;
-	duration<double> currrent;
+	duration<double> currrent1, currrent2, currrent3, currrent4;
 	high_resolution_clock::time_point begin;
 	high_resolution_clock::time_point finish;
-	board testBoard;
-	testBoard.move(2, D, 4, D);
-	testBoard.move(7, D, 5, D);
-	testBoard.move(1, B, 3, C);
-	testBoard.move(8, C, 6, E);
-	begin = high_resolution_clock::now();
-	testBoard.findWhiteBestMove(4);
-	finish = high_resolution_clock::now();
-	currrent = duration_cast<duration<double>>(finish - begin);
-
-	cout << "Benchmark Result:" << endl;
-	cout << "SimpleBoard4: " << currrent.count() << "s" << endl;
-
-	begin = high_resolution_clock::now();
-	testBoard.findWhiteBestMove(5);
-	finish = high_resolution_clock::now();
-	currrent = duration_cast<duration<double>>(finish - begin);
-
-	cout << "Benchmark Result:" << endl;
-	cout << "SimpleBoard5: " << currrent.count() << "s" << endl;
-	testBoard.move(2, E, 4, E);
-	testBoard.move(5, D, 4, E);
-	testBoard.move(3, C, 4, E);
-	testBoard.move(8, D, 5, D);
-	testBoard.move(2, F, 3, F);
-	testBoard.move(8, B, 6, C);
-	testBoard.move(1, C, 3, E);
-	testBoard.move(8, E, 8, C);
-	testBoard.move(1, G, 2, E);
-	testBoard.move(7, G, 6, G);
-	testBoard.move(2, C, 3, C);
 
 
-	begin = high_resolution_clock::now();
-	testBoard.findBlackBestMove(4);
-	finish = high_resolution_clock::now();
-	currrent = duration_cast<duration<double>>(finish - begin);
+	for (int i = 0; i < 4; i++)
+	{
+		cout << "Benchmarking for depth 4...("<< i+1<<"/4)" << endl;
+		board testBoard;
+		testBoard.move(2, D, 4, D);
+		testBoard.move(7, D, 5, D);
+		testBoard.move(1, B, 3, C);
+		begin = high_resolution_clock::now();
+		testBoard.findBlackBestMove(4);
 
-	cout << "Benchmark Result:" << endl;
-	cout << "ComplexBoard4: " << currrent.count() << "s" << endl;
+		finish = high_resolution_clock::now();
+		currrent1 += duration_cast<duration<double>>(finish - begin) / 4.0;
 
-	begin = high_resolution_clock::now();
-	testBoard.findBlackBestMove(5);
-	finish = high_resolution_clock::now();
-	currrent = duration_cast<duration<double>>(finish - begin);
 
-	cout << "Benchmark Result:" << endl;
-	cout << "ComplexBoard5: " << currrent.count() << "s" << endl;
+		testBoard.move(8, C, 6, E);
+
+		begin = high_resolution_clock::now();
+		testBoard.findWhiteBestMove(4);
+
+		finish = high_resolution_clock::now();
+		currrent2 += duration_cast<duration<double>>(finish - begin) / 4.0;
+
+
+		testBoard.move(2, E, 4, E);
+		testBoard.move(5, D, 4, E);
+		testBoard.move(3, C, 4, E);
+		testBoard.move(8, D, 5, D);
+		testBoard.move(2, F, 3, F);
+		testBoard.move(8, B, 6, C);
+		testBoard.move(1, C, 3, E);
+		testBoard.move(8, E, 8, C);
+		testBoard.move(1, G, 2, E);
+		testBoard.move(7, G, 6, G);
+		begin = high_resolution_clock::now();
+		testBoard.findWhiteBestMove(4);
+
+		finish = high_resolution_clock::now();
+		currrent3 += duration_cast<duration<double>>(finish - begin) / 4.0;
+		testBoard.move(2, C, 3, C);
+
+
+		begin = high_resolution_clock::now();
+		testBoard.findBlackBestMove(4);
+		finish = high_resolution_clock::now();
+		currrent4 += duration_cast<duration<double>>(finish - begin) / 4.0;
+
+
+		system("cls");
+		cout << "Waiting..." << endl;
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		system("cls");
+	}
+	system("cls");
+	cout << "Benchmark Resutl:" << endl;
+	cout << "Board1(B): " << currrent1.count() << "s" << endl;
+	cout << "Board2(W): " << currrent2.count() << "s" << endl;
+	cout << "Board3(W): " << currrent3.count() << "s" << endl;
+	cout << "Board4(B): " << currrent4.count() << "s" << endl;
 }

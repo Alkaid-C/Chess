@@ -1,8 +1,10 @@
 ﻿
 #include "board.h"
+#include "static.cpp"
 #include <iostream>
 #include <thread>
 #include <cmath>
+#include <algorithm>
 
 #pragma execution_character_set("utf-8")
     board::board()
@@ -200,7 +202,7 @@
 		cout << "-----------------" << endl;
 
 	}
-	int board::getWhiteMaterialAdvantage()
+	int board::getWhiteMaterialAdvantage() const
 	{
 		int BlackValueOnBoard = 0;
 		int WhiteValueOnBoard = 0;
@@ -245,54 +247,28 @@
 		}
 		return WhiteValueOnBoard - BlackValueOnBoard;
 	}
-	int board::getBlackMaterialAdvantage()
+	int board::getBlackMaterialAdvantage() const
 	{
 		return 0 - getWhiteMaterialAdvantage();
 	}
-	bool board::isWhite(int row, int col)
+	bool board::isWhite(const int& row, const int& col) const
 	{
-		switch (CurBoard[row][col])
-		{
-		case WhitePawn:
-			return true;
-		case WhiteRook:
-			return true;
-		case WhiteKnight:
-			return true;
-		case WhiteBishop:
-			return true;
-		case WhiteQueen:
-			return true;
-		case WhiteKing:
-			return true;
-		default: return false;
-		}
+		const char piece = CurBoard[row][col];
+		return (piece == 'r' || piece == 's' || piece == 'n' || piece == 'q' || piece == 'p' || piece == 'k');
 	}
-	bool board::isBlack(int row, int col)
+	bool board::isBlack(const int& row, const int& col) const
 	{
-		if (isWhite(row, col) || CurBoard[row][col] == Empty)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+		const char piece = CurBoard[row][col];
+		return (piece == 'R' || piece == 'S' || piece == 'N' ||	piece == 'Q' || piece == 'P' || piece == 'K');
 	}
-	bool board::isInTheBoard(int row, int col)
+	bool board::isInTheBoard(const int& row, const int& col) const
 	{
-		if (row > 0 && row < 9 && col > 0 && col < 9)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return (row >= 1 && row <= 8 && col >= 1 && col <= 8);
 	}
-	vector<pair<int, int>> board::WhiteOccupiedSquares()
+	 vector<pair<int, int>> board::WhiteOccupiedSquares() const
 	{
 		vector<pair<int, int>> result;
+		result.reserve(16);
 		for (int row = 1; row < 9; row++)
 		{
 			for (int col = 1; col < 9; col++)
@@ -305,9 +281,10 @@
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::BlackOccupiedSquares()
+	vector<pair<int, int>> board::BlackOccupiedSquares() const
 	{
 		vector<pair<int, int>> result;
+		result.reserve(16);
 		for (int row = 1; row < 9; row++)
 		{
 			for (int col = 1; col < 9; col++)
@@ -320,9 +297,9 @@
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::WhiteControlledSquares()
+	vector<pair<int, int>> board::WhiteControlledSquares() const
 	{
-		vector<pair<int, int>> WhitePieces = WhiteOccupiedSquares();
+		vector<pair<int, int>> const WhitePieces = WhiteOccupiedSquares();
 		vector<pair<int, int>> result;
 		bool UpRowOpen;
 		bool DownRowOpen;
@@ -841,7 +818,7 @@
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::BlackControlledSquares()
+	vector<pair<int, int>> board::BlackControlledSquares() const
 	{
 		vector<pair<int, int>> BlackPieces = BlackOccupiedSquares();
 		vector<pair<int, int>> result;
@@ -1362,7 +1339,7 @@
 		}
 		return result;
 	}
-	bool board::isWhiteControlled(int row, int col)
+	bool board::isWhiteControlled(int row, int col) const
 	{
 		vector<pair<int, int>> WhiteControlled = WhiteControlledSquares();
 		for (int i = 0; i < WhiteControlled.size(); i++)
@@ -1374,7 +1351,7 @@
 		}
 		return false;
 	}
-	bool board::isBlackControlled(int row, int col)
+	bool board::isBlackControlled(int row, int col) const
 	{
 		vector<pair<int, int>> BlackControlled = BlackControlledSquares();
 		for (int i = 0; i < BlackControlled.size(); i++)
@@ -1386,7 +1363,7 @@
 		}
 		return false;
 	}
-	bool board::isWhiteChecked()
+	bool board::isWhiteChecked() const
 	{
 		vector<pair<int, int>> BlackControlled = BlackControlledSquares();
 		for (int i = 0; i < BlackControlled.size(); i++)
@@ -1398,7 +1375,7 @@
 		}
 		return false;
 	}
-	bool board::isBlackChecked()
+	bool board::isBlackChecked() const
 	{
 		vector<pair<int, int>> WhiteControlled = WhiteControlledSquares();
 		for (int i = 0; i < WhiteControlled.size(); i++)
@@ -1410,13 +1387,13 @@
 		}
 		return false;
 	}
-	bool board::willWhiteBeChecked(int row, int col, int newRow, int newCol)
+	bool board::willWhiteBeChecked(int row, int col, int newRow, int newCol) const
 	{ 
 		board NewBoard = *this;
 		NewBoard.moveNoCheck(row, col, newRow, newCol);
 		return NewBoard.isWhiteChecked();
 	}
-	bool board::willBlackBeChecked(int row, int col, int newRow, int newCol)
+	bool board::willBlackBeChecked(int row, int col, int newRow, int newCol) const
 	{
 		board NewBoard = *this;
 		NewBoard.moveNoCheck(row, col, newRow, newCol);
@@ -1518,7 +1495,7 @@
 			return true;
 		}
 	}
-	vector<pair<int, int>> board::getPossibleMoves(int row, int col)
+	vector<pair<int, int>> board::getPossibleMoves(int row, int col) const
 	{
 		bool UpRowOpen;
 		bool DownRowOpen;
@@ -2693,7 +2670,7 @@
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::getPossibleEnPassant(int row, int col)
+	vector<pair<int, int>> board::getPossibleEnPassant(int row, int col) const
 	{
 		vector<pair<int, int>> result;
 		if (row == 5 && CurBoard[row][col]==WhitePawn)
@@ -2745,7 +2722,7 @@
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::getPossibleCastling(int row, int col)
+	vector<pair<int, int>> board::getPossibleCastling(int row, int col) const
 	{
 		vector<pair<int, int>> result;
 		if (CurBoard[row][col] == WhiteKing)
@@ -2787,7 +2764,7 @@
 		}
 		return result;
 	}
-	vector<pair<pair < int, int>, pair<int, int>> > board::getAllWhitePossibleMoves()
+	vector<pair<pair < int, int>, pair<int, int>> > board::getAllWhitePossibleMoves() const
 	{
 		vector<pair<pair < int, int>, pair<int, int>> > result;
 		for (int i = 1; i < 9; i++)
@@ -2816,7 +2793,7 @@
 		}
 		return result;
 	}
-	vector<pair<pair < int, int>, pair<int, int>> > board::getAllBlackPossibleMoves()
+	vector<pair<pair < int, int>, pair<int, int>> > board::getAllBlackPossibleMoves() const
 	{
 		vector<pair<pair < int, int>, pair<int, int>> > result;
 		for (int i = 1; i < 9; i++)
@@ -3075,7 +3052,6 @@
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllWhitePossibleMoves();
-		cout << allPossibleMoves.size()<<endl;
 		if (depth == 0)
 		{
 			if (allPossibleMoves.size() > 32)
@@ -3126,38 +3102,94 @@
 			t8.join();
 
 			// Determine the best move from the results of all threads
-			bestMove = BestMoveT1;
 			bestscore = bestScoreT1;
-
+			vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
+			BestMoveList.push_back(BestMoveT1);
 			if (bestScoreT2 > bestscore) {
-				bestMove = BestMoveT2;
 				bestscore = bestScoreT2;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT2);
 			}
-			if (bestScoreT3 > bestscore) {
-				bestMove = BestMoveT3;
-				bestscore = bestScoreT3;
-			}
-			if (bestScoreT4 > bestscore) {
-				bestMove = BestMoveT4;
-				bestscore = bestScoreT4;
-			}
-			if (bestScoreT5 > bestscore) {
-				bestMove = BestMoveT5;
-				bestscore = bestScoreT5;
-			}
-			if (bestScoreT6 > bestscore) {
-				bestMove = BestMoveT6;
-				bestscore = bestScoreT6;
-			}
-			if (bestScoreT7 > bestscore) {
-				bestMove = BestMoveT7;
-				bestscore = bestScoreT7;
-			}
-			if (bestScoreT8 > bestscore) {
-				bestMove = BestMoveT8;
-				bestscore = bestScoreT8;
+			else if (bestScoreT2 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT2);
 			}
 
+			if (bestScoreT3 > bestscore) {
+				bestscore = bestScoreT3;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT3);
+			}
+			else if (bestScoreT3 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT3);
+			}
+
+			if (bestScoreT4 > bestscore) {
+				bestscore = bestScoreT4;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT4);
+			}
+			else if (bestScoreT4 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT4);
+			}
+
+			if (bestScoreT5 > bestscore) {
+				bestscore = bestScoreT5;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT5);
+			}
+			else if (bestScoreT5 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT5);
+			}
+
+			if (bestScoreT6 > bestscore) {
+				bestscore = bestScoreT6;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT6);
+			}
+			else if (bestScoreT6 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT6);
+			}
+
+			if (bestScoreT7 > bestscore) {
+				bestscore = bestScoreT7;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT7);
+			}
+			else if (bestScoreT7 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT7);
+			}
+
+			if (bestScoreT8 > bestscore) {
+				bestscore = bestScoreT8;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT8);
+			}
+			else if (bestScoreT4 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT8);
+			}
+			int Complexity = 0;
+			int attempt;
+			if (BestMoveList.size() > 1)
+			{
+				for (int i = 0; i < BestMoveList.size(); i++)
+				{
+					board temp = *this;
+					temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
+					attempt = temp.getAllBlackPossibleMoves().size();
+					if (attempt > Complexity)
+					{
+						Complexity = attempt;
+						bestMove = BestMoveList[i];
+					}
+				}
+			}
 			return { bestMove, bestscore };
 
 		}
@@ -3222,38 +3254,94 @@
 			t8.join();
 
 			// Determine the best move from the results of all threads
-			bestMove = BestMoveT1;
 			bestscore = bestScoreT1;
-
+			vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
+			BestMoveList.push_back(BestMoveT1);
 			if (bestScoreT2 > bestscore) {
-				bestMove = BestMoveT2;
 				bestscore = bestScoreT2;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT2);
 			}
-			if (bestScoreT3 > bestscore) {
-				bestMove = BestMoveT3;
-				bestscore = bestScoreT3;
-			}
-			if (bestScoreT4 > bestscore) {
-				bestMove = BestMoveT4;
-				bestscore = bestScoreT4;
-			}
-			if (bestScoreT5 > bestscore) {
-				bestMove = BestMoveT5;
-				bestscore = bestScoreT5;
-			}
-			if (bestScoreT6 > bestscore) {
-				bestMove = BestMoveT6;
-				bestscore = bestScoreT6;
-			}
-			if (bestScoreT7 > bestscore) {
-				bestMove = BestMoveT7;
-				bestscore = bestScoreT7;
-			}
-			if (bestScoreT8 > bestscore) {
-				bestMove = BestMoveT8;
-				bestscore = bestScoreT8;
+			else if (bestScoreT2 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT2);
 			}
 
+			if (bestScoreT3 > bestscore) {
+				bestscore = bestScoreT3;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT3);
+			}
+			else if (bestScoreT3 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT3);
+			}
+
+			if (bestScoreT4 > bestscore) {
+				bestscore = bestScoreT4;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT4);
+			}
+			else if (bestScoreT4 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT4);
+			}
+
+			if (bestScoreT5 > bestscore) {
+				bestscore = bestScoreT5;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT5);
+			}
+			else if (bestScoreT5 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT5);
+			}
+
+			if (bestScoreT6 > bestscore) {
+				bestscore = bestScoreT6;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT6);
+			}
+			else if (bestScoreT6 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT6);
+			}
+
+			if (bestScoreT7 > bestscore) {
+				bestscore = bestScoreT7;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT7);
+			}
+			else if (bestScoreT7 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT7);
+			}
+
+			if (bestScoreT8 > bestscore) {
+				bestscore = bestScoreT8;
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT8);
+			}
+			else if (bestScoreT4 == bestscore)
+			{
+				BestMoveList.push_back(BestMoveT8);
+			}
+			int Complexity=0;
+			int attempt;
+			if (BestMoveList.size() > 1)
+			{
+				for (int i = 0; i < BestMoveList.size(); i++)
+				{
+					board temp = *this;
+					temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
+					attempt = temp.getAllWhitePossibleMoves().size();
+					if (attempt > Complexity)
+					{
+						Complexity = attempt;
+						bestMove = BestMoveList[i];
+					}
+				}
+			}
 			return { bestMove, bestscore };
 
 		}
@@ -3374,3 +3462,5 @@
 		}
 		return;
 	}
+
+
