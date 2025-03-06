@@ -313,8 +313,15 @@ static void PlayWithComputer()
 			if (theboard.mover == Black)
 			{
 				cout << "Computer is thinking..." << endl;
+				using namespace std::chrono;
+				duration<double> consume;
+				high_resolution_clock::time_point begin;
+				high_resolution_clock::time_point finish;
+				begin = high_resolution_clock::now();
 				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findBlackBestMove(depth);
-				cout << "Computer plays:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
+				finish = high_resolution_clock::now();
+				consume += duration_cast<duration<double>>(finish - begin) ;
+				cout << "After thinking for "<< consume.count() << " seconds, the computer plays : " << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
 				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
 				theboard.printBoard();
 			}
@@ -340,9 +347,16 @@ static void PlayWithComputer()
 			if (theboard.mover == White)
 			{
 				cout << "Computer is thinking..." << endl;
+				using namespace std::chrono;
+				duration<double> consume;
+				high_resolution_clock::time_point begin;
+				high_resolution_clock::time_point finish;
+				begin = high_resolution_clock::now();
 				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findWhiteBestMove(depth);
 				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
-				cout << "Computer plays:" << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
+				finish = high_resolution_clock::now();
+				consume += duration_cast<duration<double>>(finish - begin);
+				cout << "After thinking for " << consume.count() << " seconds, the computer plays : " << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
 				theboard.printBoard();
 			}
 			else
@@ -416,13 +430,9 @@ static void RunTimeBenchmark()
 		finish = high_resolution_clock::now();
 		currrent4 += duration_cast<duration<double>>(finish - begin) / 4.0;
 
-
-		system("cls");
 		cout << "Waiting..." << endl;
 		std::this_thread::sleep_for(std::chrono::seconds(5));
-		system("cls");
 	}
-	system("cls");
 	cout << "Benchmark Resutl:" << endl;
 	cout << "Board1(B): " << currrent1.count() << "s" << endl;
 	cout << "Board2(W): " << currrent2.count() << "s" << endl;

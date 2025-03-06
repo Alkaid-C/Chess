@@ -5,6 +5,9 @@
 #include <thread>
 #include <cmath>
 #include <algorithm>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 #pragma execution_character_set("utf-8")
     board::board()
@@ -3083,6 +3086,17 @@
 		if (base > 8)
 		{
 			double factor = static_cast<double>(base) / 8.0;
+			cout << "work distribution: factor="
+				<< factor << "; "
+				<< std::round(factor) - 0 << " - "
+				<< std::round(factor * 2) - std::round(factor) << " - "
+				<< std::round(factor * 3) - std::round(factor * 2) << " - "
+				<< std::round(factor * 4) - std::round(factor * 3) << " - "
+				<< std::round(factor * 5) - std::round(factor * 4) << " - "
+				<< std::round(factor * 6) - std::round(factor * 5) << " - "
+				<< std::round(factor * 7) - std::round(factor * 6) << " - "
+				<< std::round(factor * 8) - std::round(factor * 7) << " - "
+				<< endl;
 			std::thread t1(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
 			std::thread t2(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
 			std::thread t3(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
@@ -3235,6 +3249,17 @@
 		if (base > 8)
 		{
 			double factor = static_cast<double>(base) / 8.0;
+			cout << "work distribution: factor="
+				<< factor << "; "
+				<< std::round(factor) - 0 << " - "
+				<< std::round(factor * 2) - std::round(factor) << " - "
+				<< std::round(factor * 3) - std::round(factor * 2) << " - "
+				<< std::round(factor * 4) - std::round(factor * 3) << " - "
+				<< std::round(factor * 5) - std::round(factor * 4) << " - "
+				<< std::round(factor * 6) - std::round(factor * 5) << " - "
+				<< std::round(factor * 7) - std::round(factor * 6) << " - "
+				<< std::round(factor * 8) - std::round(factor * 7) << " - "
+				<< endl;
 			std::thread t1(&board::findBlackBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
 			std::thread t2(&board::findBlackBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
 			std::thread t3(&board::findBlackBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
@@ -3412,6 +3437,11 @@
 
 	void board::findBlackBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
 	{
+		using namespace std::chrono;
+		duration<double> consume;
+		high_resolution_clock::time_point start;
+		high_resolution_clock::time_point finish;
+		start = high_resolution_clock::now();
 		bestScoreT = -100000;
 		int attempt;
 		for (begin; begin < end; begin++)
@@ -3422,6 +3452,9 @@
 			{
 				BestMoveT = PossibleMoves[begin];
 				bestScoreT = 100000;
+				finish = high_resolution_clock::now();
+				consume = duration_cast<duration<double>>(finish - start);
+				cout << "This thread takes " << consume.count() << "s " << endl;
 				return;
 			}
 			else
@@ -3434,10 +3467,18 @@
 				}
 			}
 		}
+		finish = high_resolution_clock::now();
+		consume = duration_cast<duration<double>>(finish - start);
+		cout << "This thread takes " << consume.count() << "s " << endl;
 		return;
 	}
 	void board::findWhiteBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
 	{
+		using namespace std::chrono;
+		duration<double> consume;
+		high_resolution_clock::time_point start;
+		high_resolution_clock::time_point finish;
+		start = high_resolution_clock::now();
 		bestScoreT = -100000;
 		int attempt;
 		for (begin; begin < end; begin++)
@@ -3448,6 +3489,9 @@
 			{
 				BestMoveT = PossibleMoves[begin];
 				bestScoreT = 100000;
+				finish = high_resolution_clock::now();
+				consume = duration_cast<duration<double>>(finish - start);
+				cout << "This thread takes " << consume.count() << "s " << endl;
 				return;
 			}
 			else
@@ -3460,6 +3504,9 @@
 				}
 			}
 		}
+		finish = high_resolution_clock::now();
+		consume = duration_cast<duration<double>>(finish - start);
+		cout << "This thread takes " << consume.count() << "s " << endl;
 		return;
 	}
 
