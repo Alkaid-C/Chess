@@ -3055,326 +3055,111 @@
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllWhitePossibleMoves();
-		if (depth == 0)
+		int numThreads = allPossibleMoves.size();
+		vector<pair<pair<int, int>, pair<int, int>>> BestMoveT = vector<pair<pair<int, int>, pair<int, int>>>(numThreads);
+		vector<int> bestScoreT = vector<int>(numThreads);
+		std::vector<std::thread> threads;
+		for (int i = 0; i < numThreads; i++) 
 		{
-			if (allPossibleMoves.size() > 32)
+
+			threads.push_back
+			(
+				std::thread(&board::findBlackBestMoveCore, this, std::ref(BestMoveT[i]), std::ref(bestScoreT[i]), std::ref(allPossibleMoves), i, i + 1, depth)
+			);
+			
+		}
+		bestscore = bestScoreT[0];
+		vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
+		BestMoveList.push_back(BestMoveT[0]);
+		for (int i = 1; i < numThreads; i++)
+		{
+			if (bestScoreT[i] > bestscore) 
 			{
-				depth = 4;
+				bestscore = bestScoreT[i];
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT[i]);
 			}
-			else
+			else if (bestScoreT[i] == bestscore) 
 			{
-				depth = 5;
+				BestMoveList.push_back(BestMoveT[i]);
 			}
 		}
-		pair<pair<int, int>, pair<int, int>> BestMoveT1;
-		pair<pair<int, int>, pair<int, int>> BestMoveT2;
-		pair<pair<int, int>, pair<int, int>> BestMoveT3;
-		pair<pair<int, int>, pair<int, int>> BestMoveT4;
-		pair<pair<int, int>, pair<int, int>> BestMoveT5;
-		pair<pair<int, int>, pair<int, int>> BestMoveT6;
-		pair<pair<int, int>, pair<int, int>> BestMoveT7;
-		pair<pair<int, int>, pair<int, int>> BestMoveT8;
-		int bestScoreT1;
-		int bestScoreT2;
-		int bestScoreT3;
-		int bestScoreT4;
-		int bestScoreT5;
-		int bestScoreT6;
-		int bestScoreT7;
-		int bestScoreT8;
-		int base = allPossibleMoves.size();
-		if (base > 8)
+		for (auto& t : threads) {
+			t.join();
+		}
+		int Complexity = 0;
+		int attempt;
+		if (BestMoveList.size() > 1)
 		{
-			double factor = static_cast<double>(base) / 8.0;
-			cout << "work distribution: factor="
-				<< factor << "; "
-				<< std::round(factor) - 0 << " - "
-				<< std::round(factor * 2) - std::round(factor) << " - "
-				<< std::round(factor * 3) - std::round(factor * 2) << " - "
-				<< std::round(factor * 4) - std::round(factor * 3) << " - "
-				<< std::round(factor * 5) - std::round(factor * 4) << " - "
-				<< std::round(factor * 6) - std::round(factor * 5) << " - "
-				<< std::round(factor * 7) - std::round(factor * 6) << " - "
-				<< std::round(factor * 8) - std::round(factor * 7) << " - "
-				<< endl;
-			std::thread t1(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
-			std::thread t2(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
-			std::thread t3(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
-			std::thread t4(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT4), std::ref(bestScoreT4), std::ref(allPossibleMoves), std::round(3.0 * factor), std::round(4.0 * factor), depth);
-			std::thread t5(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT5), std::ref(bestScoreT5), std::ref(allPossibleMoves), std::round(4.0 * factor), std::round(5.0 * factor), depth);
-			std::thread t6(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT6), std::ref(bestScoreT6), std::ref(allPossibleMoves), std::round(5.0 * factor), std::round(6.0 * factor), depth);
-			std::thread t7(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT7), std::ref(bestScoreT7), std::ref(allPossibleMoves), std::round(6.0 * factor), std::round(7.0 * factor), depth);
-			std::thread t8(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT8), std::ref(bestScoreT8), std::ref(allPossibleMoves), std::round(7.0 * factor), allPossibleMoves.size(), depth);
-
-			t1.join();
-			t2.join();
-			t3.join();
-			t4.join();
-			t5.join();
-			t6.join();
-			t7.join();
-			t8.join();
-
-			// Determine the best move from the results of all threads
-			bestscore = bestScoreT1;
-			vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
-			BestMoveList.push_back(BestMoveT1);
-			if (bestScoreT2 > bestscore) {
-				bestscore = bestScoreT2;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT2);
-			}
-			else if (bestScoreT2 == bestscore)
+			for (int i = 0; i < BestMoveList.size(); i++)
 			{
-				BestMoveList.push_back(BestMoveT2);
-			}
-
-			if (bestScoreT3 > bestscore) {
-				bestscore = bestScoreT3;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT3);
-			}
-			else if (bestScoreT3 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT3);
-			}
-
-			if (bestScoreT4 > bestscore) {
-				bestscore = bestScoreT4;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT4);
-			}
-			else if (bestScoreT4 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT4);
-			}
-
-			if (bestScoreT5 > bestscore) {
-				bestscore = bestScoreT5;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT5);
-			}
-			else if (bestScoreT5 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT5);
-			}
-
-			if (bestScoreT6 > bestscore) {
-				bestscore = bestScoreT6;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT6);
-			}
-			else if (bestScoreT6 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT6);
-			}
-
-			if (bestScoreT7 > bestscore) {
-				bestscore = bestScoreT7;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT7);
-			}
-			else if (bestScoreT7 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT7);
-			}
-
-			if (bestScoreT8 > bestscore) {
-				bestscore = bestScoreT8;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT8);
-			}
-			else if (bestScoreT4 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT8);
-			}
-			int Complexity = 0;
-			int attempt;
-			if (BestMoveList.size() > 1)
-			{
-				for (int i = 0; i < BestMoveList.size(); i++)
+				board temp = *this;
+				temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
+				attempt = temp.getAllBlackPossibleMoves().size();
+				if (attempt > Complexity)
 				{
-					board temp = *this;
-					temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
-					attempt = temp.getAllBlackPossibleMoves().size();
-					if (attempt > Complexity)
-					{
-						Complexity = attempt;
-						bestMove = BestMoveList[i];
-					}
+					Complexity = attempt;
+					bestMove = BestMoveList[i];
 				}
 			}
-			return { bestMove, bestscore };
-
 		}
-		else
-		{
-			findWhiteBestMoveCore(BestMoveT1, bestScoreT1, allPossibleMoves, 0, base, depth);
-			return { BestMoveT1,bestScoreT1 };
-		}
+		return { bestMove, bestscore };
 	}
 	pair<pair<pair<int, int>, pair<int, int>>, int> board::findBlackBestMove(int depth)
 	{
 		pair<pair<int, int>, pair<int, int>> bestMove;
 		int bestscore = -100000;
 		vector<pair<pair < int, int>, pair<int, int>> > allPossibleMoves = getAllBlackPossibleMoves();
-		if (depth == 0)
+		int numThreads = allPossibleMoves.size();
+		vector<pair<pair<int, int>, pair<int, int>>> BestMoveT = vector<pair<pair<int, int>, pair<int, int>>>(numThreads);
+		vector<int> bestScoreT = vector<int>(numThreads);
+		std::vector<std::thread> threads;
+		for (int i = 0; i < numThreads; i++)
 		{
-			if (allPossibleMoves.size() > 32)
+
+			threads.push_back
+			(
+				std::thread(&board::findWhiteBestMoveCore, this, std::ref(BestMoveT[i]), std::ref(bestScoreT[i]), std::ref(allPossibleMoves), i, i + 1, depth)
+			);
+
+		}
+		bestscore = bestScoreT[0];
+		vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
+		BestMoveList.push_back(BestMoveT[0]);
+		for (int i = 1; i < numThreads; i++)
+		{
+			if (bestScoreT[i] > bestscore)
 			{
-				depth = 4;
+				bestscore = bestScoreT[i];
+				BestMoveList.clear();
+				BestMoveList.push_back(BestMoveT[i]);
 			}
-			else
+			else if (bestScoreT[i] == bestscore)
 			{
-				depth = 5;
+				BestMoveList.push_back(BestMoveT[i]);
 			}
 		}
-		pair<pair<int, int>, pair<int, int>> BestMoveT1;
-		pair<pair<int, int>, pair<int, int>> BestMoveT2;
-		pair<pair<int, int>, pair<int, int>> BestMoveT3;
-		pair<pair<int, int>, pair<int, int>> BestMoveT4;
-		pair<pair<int, int>, pair<int, int>> BestMoveT5;
-		pair<pair<int, int>, pair<int, int>> BestMoveT6;
-		pair<pair<int, int>, pair<int, int>> BestMoveT7;
-		pair<pair<int, int>, pair<int, int>> BestMoveT8;
-		int bestScoreT1;
-		int bestScoreT2;
-		int bestScoreT3;
-		int bestScoreT4;
-		int bestScoreT5;
-		int bestScoreT6;
-		int bestScoreT7;
-		int bestScoreT8;
-		int base = allPossibleMoves.size();
-		if (base > 8)
+		for (auto& t : threads) {
+			t.join();
+		}
+		int Complexity = 0;
+		int attempt;
+		if (BestMoveList.size() > 1)
 		{
-			double factor = static_cast<double>(base) / 8.0;
-			cout << "work distribution: factor="
-				<< factor << "; "
-				<< std::round(factor) - 0 << " - "
-				<< std::round(factor * 2) - std::round(factor) << " - "
-				<< std::round(factor * 3) - std::round(factor * 2) << " - "
-				<< std::round(factor * 4) - std::round(factor * 3) << " - "
-				<< std::round(factor * 5) - std::round(factor * 4) << " - "
-				<< std::round(factor * 6) - std::round(factor * 5) << " - "
-				<< std::round(factor * 7) - std::round(factor * 6) << " - "
-				<< std::round(factor * 8) - std::round(factor * 7) << " - "
-				<< endl;
-			std::thread t1(&board::findBlackBestMoveCore, this, std::ref(BestMoveT1), std::ref(bestScoreT1), std::ref(allPossibleMoves), 0, std::round(factor), depth);
-			std::thread t2(&board::findBlackBestMoveCore, this, std::ref(BestMoveT2), std::ref(bestScoreT2), std::ref(allPossibleMoves), std::round(factor), std::round(2.0 * factor), depth);
-			std::thread t3(&board::findBlackBestMoveCore, this, std::ref(BestMoveT3), std::ref(bestScoreT3), std::ref(allPossibleMoves), std::round(2.0 * factor), std::round(3.0 * factor), depth);
-			std::thread t4(&board::findBlackBestMoveCore, this, std::ref(BestMoveT4), std::ref(bestScoreT4), std::ref(allPossibleMoves), std::round(3.0 * factor), std::round(4.0 * factor), depth);
-			std::thread t5(&board::findBlackBestMoveCore, this, std::ref(BestMoveT5), std::ref(bestScoreT5), std::ref(allPossibleMoves), std::round(4.0 * factor), std::round(5.0 * factor), depth);
-			std::thread t6(&board::findBlackBestMoveCore, this, std::ref(BestMoveT6), std::ref(bestScoreT6), std::ref(allPossibleMoves), std::round(5.0 * factor), std::round(6.0 * factor), depth);
-			std::thread t7(&board::findBlackBestMoveCore, this, std::ref(BestMoveT7), std::ref(bestScoreT7), std::ref(allPossibleMoves), std::round(6.0 * factor), std::round(7.0 * factor), depth);
-			std::thread t8(&board::findBlackBestMoveCore, this, std::ref(BestMoveT8), std::ref(bestScoreT8), std::ref(allPossibleMoves), std::round(7.0 * factor), allPossibleMoves.size(), depth);
-
-			t1.join();
-			t2.join();
-			t3.join();
-			t4.join();
-			t5.join();
-			t6.join();
-			t7.join();
-			t8.join();
-
-			// Determine the best move from the results of all threads
-			bestscore = bestScoreT1;
-			vector<pair<pair<int, int>, pair<int, int>>> BestMoveList;
-			BestMoveList.push_back(BestMoveT1);
-			if (bestScoreT2 > bestscore) {
-				bestscore = bestScoreT2;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT2);
-			}
-			else if (bestScoreT2 == bestscore)
+			for (int i = 0; i < BestMoveList.size(); i++)
 			{
-				BestMoveList.push_back(BestMoveT2);
-			}
-
-			if (bestScoreT3 > bestscore) {
-				bestscore = bestScoreT3;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT3);
-			}
-			else if (bestScoreT3 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT3);
-			}
-
-			if (bestScoreT4 > bestscore) {
-				bestscore = bestScoreT4;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT4);
-			}
-			else if (bestScoreT4 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT4);
-			}
-
-			if (bestScoreT5 > bestscore) {
-				bestscore = bestScoreT5;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT5);
-			}
-			else if (bestScoreT5 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT5);
-			}
-
-			if (bestScoreT6 > bestscore) {
-				bestscore = bestScoreT6;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT6);
-			}
-			else if (bestScoreT6 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT6);
-			}
-
-			if (bestScoreT7 > bestscore) {
-				bestscore = bestScoreT7;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT7);
-			}
-			else if (bestScoreT7 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT7);
-			}
-
-			if (bestScoreT8 > bestscore) {
-				bestscore = bestScoreT8;
-				BestMoveList.clear();
-				BestMoveList.push_back(BestMoveT8);
-			}
-			else if (bestScoreT4 == bestscore)
-			{
-				BestMoveList.push_back(BestMoveT8);
-			}
-			int Complexity=0;
-			int attempt;
-			if (BestMoveList.size() > 1)
-			{
-				for (int i = 0; i < BestMoveList.size(); i++)
+				board temp = *this;
+				temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
+				attempt = temp.getAllWhitePossibleMoves().size();
+				if (attempt > Complexity)
 				{
-					board temp = *this;
-					temp.moveNoCheck(BestMoveList[i].first.first, BestMoveList[i].first.second, BestMoveList[i].second.first, BestMoveList[i].second.first);
-					attempt = temp.getAllWhitePossibleMoves().size();
-					if (attempt > Complexity)
-					{
-						Complexity = attempt;
-						bestMove = BestMoveList[i];
-					}
+					Complexity = attempt;
+					bestMove = BestMoveList[i];
+					
 				}
 			}
-			return { bestMove, bestscore };
-
 		}
-		else
-		{
-			findBlackBestMoveCore(BestMoveT1, bestScoreT1, allPossibleMoves, 0, base, depth);
-			return { BestMoveT1,bestScoreT1 };
-		}
+		return { bestMove, bestscore };
 	}
 	int board::findWhiteBestScore(int depth)
 	{
@@ -3437,11 +3222,6 @@
 
 	void board::findBlackBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
 	{
-		using namespace std::chrono;
-		duration<double> consume;
-		high_resolution_clock::time_point start;
-		high_resolution_clock::time_point finish;
-		start = high_resolution_clock::now();
 		bestScoreT = -100000;
 		int attempt;
 		for (begin; begin < end; begin++)
@@ -3452,9 +3232,6 @@
 			{
 				BestMoveT = PossibleMoves[begin];
 				bestScoreT = 100000;
-				finish = high_resolution_clock::now();
-				consume = duration_cast<duration<double>>(finish - start);
-				cout << "This thread takes " << consume.count() << "s " << endl;
 				return;
 			}
 			else
@@ -3467,18 +3244,10 @@
 				}
 			}
 		}
-		finish = high_resolution_clock::now();
-		consume = duration_cast<duration<double>>(finish - start);
-		cout << "This thread takes " << consume.count() << "s " << endl;
 		return;
 	}
 	void board::findWhiteBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth)
 	{
-		using namespace std::chrono;
-		duration<double> consume;
-		high_resolution_clock::time_point start;
-		high_resolution_clock::time_point finish;
-		start = high_resolution_clock::now();
 		bestScoreT = -100000;
 		int attempt;
 		for (begin; begin < end; begin++)
@@ -3489,9 +3258,6 @@
 			{
 				BestMoveT = PossibleMoves[begin];
 				bestScoreT = 100000;
-				finish = high_resolution_clock::now();
-				consume = duration_cast<duration<double>>(finish - start);
-				cout << "This thread takes " << consume.count() << "s " << endl;
 				return;
 			}
 			else
@@ -3504,9 +3270,6 @@
 				}
 			}
 		}
-		finish = high_resolution_clock::now();
-		consume = duration_cast<duration<double>>(finish - start);
-		cout << "This thread takes " << consume.count() << "s " << endl;
 		return;
 	}
 

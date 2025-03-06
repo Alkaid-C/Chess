@@ -378,33 +378,32 @@ static void PlayWithComputer()
 }
 static void RunTimeBenchmark()
 {
+	int depth = 5;
+	int round = 1;
 	using namespace std::chrono;
 	duration<double> currrent1, currrent2, currrent3, currrent4;
 	high_resolution_clock::time_point begin;
 	high_resolution_clock::time_point finish;
 
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < round; i++)
 	{
-		cout << "Benchmarking for depth 4...("<< i+1<<"/4)" << endl;
+        cout << "Benchmarking..." << i + 1 << "/" << round + 1 << endl;
 		board testBoard;
 		testBoard.move(2, D, 4, D);
 		testBoard.move(7, D, 5, D);
 		testBoard.move(1, B, 3, C);
 		begin = high_resolution_clock::now();
-		testBoard.findBlackBestMove(4);
-
+		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
-		currrent1 += duration_cast<duration<double>>(finish - begin) / 4.0;
-
-
+		currrent1 += duration_cast<duration<double>>(finish - begin) / round;
+		
 		testBoard.move(8, C, 6, E);
-
 		begin = high_resolution_clock::now();
-		testBoard.findWhiteBestMove(4);
+		testBoard.findWhiteBestMove(depth);
 
 		finish = high_resolution_clock::now();
-		currrent2 += duration_cast<duration<double>>(finish - begin) / 4.0;
+		currrent2 += duration_cast<duration<double>>(finish - begin) / round;
 
 
 		testBoard.move(2, E, 4, E);
@@ -418,20 +417,22 @@ static void RunTimeBenchmark()
 		testBoard.move(1, G, 2, E);
 		testBoard.move(7, G, 6, G);
 		begin = high_resolution_clock::now();
-		testBoard.findWhiteBestMove(4);
+		testBoard.findWhiteBestMove(depth);
 
 		finish = high_resolution_clock::now();
-		currrent3 += duration_cast<duration<double>>(finish - begin) / 4.0;
+		currrent3 += duration_cast<duration<double>>(finish - begin) / round;
 		testBoard.move(2, C, 3, C);
 
 
 		begin = high_resolution_clock::now();
-		testBoard.findBlackBestMove(4);
+		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
-		currrent4 += duration_cast<duration<double>>(finish - begin) / 4.0;
-
-		cout << "Waiting..." << endl;
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		currrent4 += duration_cast<duration<double>>(finish - begin) / round;
+		if (i< round-1)
+		{ 
+			cout << "Waiting..." << endl;
+			std::this_thread::sleep_for(std::chrono::seconds(5));
+		}
 	}
 	cout << "Benchmark Resutl:" << endl;
 	cout << "Board1(B): " << currrent1.count() << "s" << endl;
