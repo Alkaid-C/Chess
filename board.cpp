@@ -1513,6 +1513,7 @@
 		switch (CurBoard[row][col])
 		{
 		case WhitePawn:
+			result.reserve(4);
 			if (row == 2) 
 			{
 				if (CurBoard[4][col] == Empty && CurBoard[3][col]==Empty)
@@ -1543,6 +1544,7 @@
 			}
 			break;
 		case WhiteRook:
+			result.reserve(14);
 			UpRowOpen = true;
 			DownRowOpen = true;
 			RightColOpen = true;
@@ -1649,6 +1651,7 @@
 			}
 			break;
 		case WhiteKnight:
+			result.reserve(8);
 			if (isInTheBoard(row + 2, col + 1))
 			{
 				if (isBlack(row + 2, col + 1) || CurBoard[row + 2][col + 1] == Empty)
@@ -1707,6 +1710,7 @@
 			}
 			break;
 		case WhiteBishop:
+			result.reserve(14);
 			UpRightOpen = true;
 			UpLeftOpen = true;
 			DownRightOpen = true;
@@ -1813,6 +1817,7 @@
 			}
 			break;
 		case WhiteQueen:
+			result.reserve(28);
 			UpRowOpen = true;
 			DownRowOpen = true;
 			RightColOpen = true;
@@ -2023,6 +2028,7 @@
 			}
 			break;
 		case WhiteKing:
+			result.reserve(8);
 			if (isInTheBoard(row + 1, col))
 			{
 				if (isBlack(row + 1, col) || CurBoard[row + 1][col] == Empty)
@@ -2081,6 +2087,7 @@
 			}
 			break;
 		case BlackPawn:
+			result.reserve(4);
 			if (row == 7)
 			{
 				if (CurBoard[5][col] == Empty && CurBoard[6][col]==Empty)
@@ -2111,6 +2118,7 @@
 			}
 			break;
 		case BlackRook:
+			result.reserve(14);
 			UpRowOpen = true;
 			DownRowOpen = true;
 			RightColOpen = true;
@@ -2217,6 +2225,7 @@
 			}
 			break;
 		case BlackKnight:
+			result.reserve(8);
 			if (isInTheBoard(row + 2, col + 1))
 			{
 				if (isWhite(row + 2, col + 1) || CurBoard[row + 2][col + 1] == Empty)
@@ -2275,6 +2284,7 @@
 			}
 			break;
 		case BlackBishop:
+			result.reserve(14);
 			UpRightOpen = true;
 			UpLeftOpen = true;
 			DownRightOpen = true;
@@ -2381,6 +2391,7 @@
 			}
 			break;
 		case BlackQueen:
+			result.reserve(28);
 			UpRowOpen = true;
 			DownRowOpen = true;
 			RightColOpen = true;
@@ -2591,6 +2602,7 @@
 			}
 			break;
 		case BlackKing:
+			result.reserve(8);
 			if (isInTheBoard(row + 1, col))
 			{
 				if (isWhite(row + 1, col) || CurBoard[row + 1][col] == Empty)
@@ -2767,33 +2779,36 @@
 		}
 		return result;
 	}
-	vector<pair<pair < int, int>, pair<int, int>> > board::getAllWhitePossibleMoves() const
+	vector<pair<pair<int, int>, pair<int, int>>> board::getAllWhitePossibleMoves() const
 	{
-		vector<pair<pair < int, int>, pair<int, int>> > result;
+		vector<pair<pair<int, int>, pair<int, int>>> result;
+		result.reserve(128); 
 		for (int i = 1; i < 9; i++)
 		{
 			for (int j = 1; j < 9; j++)
 			{
 				if (isWhite(i, j))
 				{
-					vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
-					vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j); 
-					vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
-					for (int k = 0; k < possibleMoves.size(); k++)
+					const pair<int, int> from(i, j);
+					const vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
+					for (size_t k = 0; k < possibleMoves.size(); k++)
 					{
-						result.push_back({ {i,j},possibleMoves[k] });
+						result.emplace_back(from, possibleMoves[k]);
 					}
-					for (int k = 0; k < possibleEnPassant.size(); k++)
+					const vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j);
+					for (size_t k = 0; k < possibleEnPassant.size(); k++)
 					{
-						result.push_back({ {i,j},possibleEnPassant[k] });
+						result.emplace_back(from, possibleEnPassant[k]);
 					}
-					for (int k = 0; k < possibleCastling.size(); k++)
+					const vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
+					for (size_t k = 0; k < possibleCastling.size(); k++)
 					{
-						result.push_back({ {i,j},possibleCastling[k] });
+						result.emplace_back(from, possibleCastling[k]);
 					}
 				}
 			}
 		}
+
 		return result;
 	}
 	vector<pair<pair < int, int>, pair<int, int>> > board::getAllBlackPossibleMoves() const
@@ -2805,20 +2820,21 @@
 			{
 				if (isBlack(i, j))
 				{
-					vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
-					vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j);
-					vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
-					for (int k = 0; k < possibleMoves.size(); k++)
+					const pair<int, int> from(i, j);
+					const vector<pair<int, int>> possibleMoves = getPossibleMoves(i, j);
+					for (size_t k = 0; k < possibleMoves.size(); k++)
 					{
-						result.push_back({ {i,j},possibleMoves[k] });
+						result.emplace_back(from, possibleMoves[k]);
 					}
-					for (int k = 0; k < possibleEnPassant.size(); k++)
+					const vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(i, j);
+					for (size_t k = 0; k < possibleEnPassant.size(); k++)
 					{
-						result.push_back({ {i,j},possibleEnPassant[k] });
+						result.emplace_back(from, possibleEnPassant[k]);
 					}
-					for (int k = 0; k < possibleCastling.size(); k++)
+					const vector<pair<int, int>> possibleCastling = getPossibleCastling(i, j);
+					for (size_t k = 0; k < possibleCastling.size(); k++)
 					{
-						result.push_back({ {i,j},possibleCastling[k] });
+						result.emplace_back(from, possibleCastling[k]);
 					}
 				}
 			}
@@ -2827,7 +2843,7 @@
 	}
 	bool board::move(int row, int col, int newRow, int newCol)
 	{
-		vector<pair<int, int>> possibleMoves = getPossibleMoves(row, col);
+		const vector<pair<int, int>> possibleMoves = getPossibleMoves(row, col);
 		bool isRegularMove = false;
 		for (int i = 0; i < possibleMoves.size(); i++)
 		{
@@ -2885,7 +2901,7 @@
 		}
 		else
 		{
-			vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(row, col);
+			const vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(row, col);
 			bool isEnPassant = false;
 			for (int i = 0; i < possibleEnPassant.size(); i++)
 			{
@@ -2911,7 +2927,7 @@
 			}
 			else
 			{
-				vector<pair<int, int>> possibleCastling = getPossibleCastling(row, col);
+				const vector<pair<int, int>> possibleCastling = getPossibleCastling(row, col);
 				bool isCastling = false;
 				for (int i = 0; i < possibleCastling.size(); i++)
 				{
@@ -2948,7 +2964,7 @@
 	}
 	void board::moveNoCheck(int row, int col, int newRow, int newCol)
 	{
-		vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(row, col);
+		const vector<pair<int, int>> possibleEnPassant = getPossibleEnPassant(row, col);
 		bool isEnPassant = false;
 		for (int i = 0; i < possibleEnPassant.size(); i++)
 		{
@@ -2974,7 +2990,7 @@
 		}
 		else
 		{
-			vector<pair<int, int>> possibleCastling = getPossibleCastling(row, col);
+			const vector<pair<int, int>> possibleCastling = getPossibleCastling(row, col);
 			bool isCastling = false;
 			for (int i = 0; i < possibleCastling.size(); i++)
 			{
