@@ -8,184 +8,216 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+#include <cstring>
 
 #pragma execution_character_set("utf-8")
+
     board::board()
     {
-        CurBoard = { 
-            // X     A     B     C     D     E     F     G     H
-            {Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty},//row 0 
-            {Empty,WhiteRook,WhiteKnight,WhiteBishop,WhiteQueen,WhiteKing,WhiteBishop,WhiteKnight,WhiteRook},//row 1
-            {Empty,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn},//row 2
-            {Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty},//row 3
-            {Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty},//row 4
-            {Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty},//row 5
-            {Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty},//row 6
-            {Empty,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn},//row 7
-            {Empty,BlackRook,BlackKnight,BlackBishop,BlackQueen,BlackKing,BlackBishop,BlackKnight,BlackRook}//row 8
-        };
+		for (int i = 16; i < 48; i++) {
+			CurBoard[i] = Piece::Empty;
+		}
+
+		CurBoard[Loc::A2] = Piece::WhitePawn;
+		CurBoard[Loc::B2] = Piece::WhitePawn;
+		CurBoard[Loc::C2] = Piece::WhitePawn;
+		CurBoard[Loc::D2] = Piece::WhitePawn;
+		CurBoard[Loc::E2] = Piece::WhitePawn;
+		CurBoard[Loc::F2] = Piece::WhitePawn;
+		CurBoard[Loc::G2] = Piece::WhitePawn;
+		CurBoard[Loc::H2] = Piece::WhitePawn;
+
+		CurBoard[Loc::A7] = Piece::BlackPawn;
+		CurBoard[Loc::B7] = Piece::BlackPawn;
+		CurBoard[Loc::C7] = Piece::BlackPawn;
+		CurBoard[Loc::D7] = Piece::BlackPawn;
+		CurBoard[Loc::E7] = Piece::BlackPawn;
+		CurBoard[Loc::F7] = Piece::BlackPawn;
+		CurBoard[Loc::G7] = Piece::BlackPawn;
+		CurBoard[Loc::H7] = Piece::BlackPawn;
+
+		CurBoard[Loc::A1] = Piece::WhiteRook;
+		CurBoard[Loc::B1] = Piece::WhiteKnight;
+		CurBoard[Loc::C1] = Piece::WhiteBishop;
+		CurBoard[Loc::D1] = Piece::WhiteQueen;
+		CurBoard[Loc::E1] = Piece::WhiteKing;
+		CurBoard[Loc::F1] = Piece::WhiteBishop;
+		CurBoard[Loc::G1] = Piece::WhiteKnight;
+		CurBoard[Loc::H1] = Piece::WhiteRook;
+
+		CurBoard[Loc::A8] = Piece::BlackRook;
+		CurBoard[Loc::B8] = Piece::BlackKnight;
+		CurBoard[Loc::C8] = Piece::BlackBishop;
+		CurBoard[Loc::D8] = Piece::BlackQueen;
+		CurBoard[Loc::E8] = Piece::BlackKing;
+		CurBoard[Loc::F8] = Piece::BlackBishop;
+		CurBoard[Loc::G8] = Piece::BlackKnight;
+		CurBoard[Loc::H8] = Piece::BlackRook;
+
         TakenPieceBlack = {};
         TakenPieceWhite = {};
         WhiteCastleKingSideQualified = true;
         WhiteCastleQueenSideQualified = true;
         BlackCastleKingSideQualified = true;
         BlackCastleQueenSideQualified = true;
-		MoveHistory = {};
+		LastMove = {};
 		mover = White;
-		unicodeSupported = false;
     }
+
 	board::board(const board& theboard)
 	{
-		CurBoard = theboard.CurBoard;
+		memcpy(CurBoard, theboard.CurBoard, sizeof(CurBoard));
 		TakenPieceBlack = theboard.TakenPieceBlack;
 		TakenPieceWhite = theboard.TakenPieceWhite;
 		WhiteCastleKingSideQualified = theboard.WhiteCastleKingSideQualified;
 		WhiteCastleQueenSideQualified = theboard.WhiteCastleQueenSideQualified;
 		BlackCastleKingSideQualified = theboard.BlackCastleKingSideQualified;
 		BlackCastleQueenSideQualified = theboard.BlackCastleQueenSideQualified;
-		MoveHistory = theboard.MoveHistory;
+		LastMove = theboard.LastMove;
 		mover = theboard.mover;
-		unicodeSupported = theboard.unicodeSupported;
 	}
-	void board::setUnicodeSupported(bool support)
+
+
+	inline bool board::isLocWhite(Loc loc) const
 	{
-		unicodeSupported = support;
+		return isWhite(CurBoard[loc]);
 	}
-	void board::PromptForUnicodeSupport()
+	inline bool board::isLocBlack(Loc loc) const
 	{
-		system("chcp 65001");
-		cout << "Does your terminal support unicode characters? (Y/N)" << endl;
-		cout << "For example, is this white pawn (" << u8"\u2659" << ") correctly displayed ? If not, type N." << endl;
-		char unicode;
-		cin >> unicode;
-		if (unicode == 'Y')
+		return isBlack(CurBoard[loc]);
+	}
+	inline bool board::isLocEmpty(Loc loc) const
+	{
+		return isEmpty(CurBoard[loc]);
+	}
+
+
+	void board::printPiece(const Piece piece, const bool UnicodeSupported) const
+	{
+		if (!UnicodeSupported)
 		{
-			unicodeSupported = true;
-			cout << "In this case, the pieces will be displayed as follows:" << endl;
-			cout << "White Pawn: " << u8"\u2659" << endl;
-			cout << "White Rook: " << u8"\u2656" << endl;
-			cout << "White Knight: " << u8"\u2658" << endl;
-			cout << "White Bishop: " << u8"\u2657" << endl;
-			cout << "White Queen: " << u8"\u2655" << endl;
-			cout << "White King: " << u8"\u2654" << endl;
-			cout << "Black Pawn: " << u8"\u265F" << endl;
-			cout << "Black Rook: " << u8"\u265C" << endl;
-			cout << "Black Knight: " << u8"\u265E" << endl;
-			cout << "Black Bishop: " << u8"\u265D" << endl;
-			cout << "Black Queen: " << u8"\u265B" << endl;
-			cout << "Black King: " << u8"\u265A" << endl;
-			cout << "Empty Square: *" << endl;
+			switch (piece)
+			{
+			case Piece::WhitePawn:
+				cout << 'p';
+				break;
+			case Piece::WhiteRook:
+				cout << 'r';
+				break;
+			case Piece::WhiteKnight:
+				cout << 'n';
+				break;
+			case Piece::WhiteBishop:
+				cout << 'b';
+				break;
+			case Piece::WhiteQueen:
+				cout << 'q';
+				break;
+			case Piece::WhiteKing:
+				cout << 'k';
+				break;
+			case Piece::BlackPawn:
+				cout << 'P';
+				break;
+			case Piece::BlackRook:
+				cout << 'R';
+				break;
+			case Piece::BlackKnight:
+				cout << 'N';
+				break;
+			case Piece::BlackBishop:
+				cout << 'B';
+				break;
+			case Piece::BlackQueen:
+				cout << 'Q';
+				break;
+			case Piece::BlackKing:
+				cout << 'K';
+				break;
+			case Piece::Empty:
+				cout << '*';
+			}
 		}
 		else
 		{
-			unicodeSupported = false;
-			cout << "In this case, the pieces will be displayed as follows:" << endl;
-			cout << "White Pawn: P" << endl;
-			cout << "White Rook: R" << endl;
-			cout << "White Knight: N" << endl;
-			cout << "White Bishop: S" << endl;
-			cout << "White Queen: Q" << endl;
-			cout << "White King: K" << endl;
-			cout << "Black Pawn: p" << endl;
-			cout << "Black Rook: r" << endl;
-			cout << "Black Knight: n" << endl;
-			cout << "Black Bishop: s" << endl;
-			cout << "Black Queen: q" << endl;
-			cout << "Black King: k" << endl;
-			cout << "Empty Square: *" << endl;
-		}
-	}
-	char board::getPieceAt(int row, int col)
-	{
-		return CurBoard[row][col];
-	}
-	void board::setPieceAt(int row, int col, char newPiece)
-	{
-		CurBoard[row][col] = newPiece;
-		return;
-	}
-	void board::removePiece(int row, int col)
-	{
-		CurBoard[row][col] = '*';
-		return;
-	}
-	void board::PieceCast(char piece)
-	{
-		if (!unicodeSupported)
-		{
-			cout << piece;
-			return;
-		}
-		switch (piece)
-		{
-		case WhitePawn:
-			cout << u8"\u2659";
-			break;
-		case WhiteRook:
-			cout << u8"\u2656";
-			break;
-		case WhiteKnight:
-			cout << u8"\u2658";
-			break;
-		case WhiteBishop:
-			cout << u8"\u2657";
-			break;
-		case WhiteQueen:
-			cout << u8"\u2655";
-			break;
-		case WhiteKing:
-			cout << u8"\u2654";
-			break;
-		case BlackPawn:
-			cout << u8"\u265F";
-			break;
-		case BlackRook:
-			cout << u8"\u265C";
-			break;
-		case BlackKnight:
-			cout << u8"\u265E";
-			break;
-		case BlackBishop:
-			cout << u8"\u265D";
-			break;
-		case BlackQueen:
-			cout << u8"\u265B";
-			break;
-		case BlackKing:
-			cout << u8"\u265A";
-			break;
-		case Empty:
-			cout << '*';
-		}
-		return;
-	}
-	void board::printBoard()
-	{
-		cout << "X A B C D E F G H" << endl;
-		for (int i = 1; i < 9; i++)
-		{
-			cout << i << " ";
-			for (int j = 1; j < 9; j++)
+			switch (piece)
 			{
-				PieceCast(CurBoard[i][j]);
-				cout << " ";
+			case Piece::WhitePawn:
+				cout << u8"\u2659";
+				break;
+			case Piece::WhiteRook:
+				cout << u8"\u2656";
+				break;
+			case Piece::WhiteKnight:
+				cout << u8"\u2658";
+				break;
+			case Piece::WhiteBishop:
+				cout << u8"\u2657";
+				break;
+			case Piece::WhiteQueen:
+				cout << u8"\u2655";
+				break;
+			case Piece::WhiteKing:
+				cout << u8"\u2654";
+				break;
+			case Piece::BlackPawn:
+				cout << u8"\u265F";
+				break;
+			case Piece::BlackRook:
+				cout << u8"\u265C";
+				break;
+			case Piece::BlackKnight:
+				cout << u8"\u265E";
+				break;
+			case Piece::BlackBishop:
+				cout << u8"\u265D";
+				break;
+			case Piece::BlackQueen:
+				cout << u8"\u265B";
+				break;
+			case Piece::BlackKing:
+				cout << u8"\u265A";
+				break;
+			case Piece::Empty:
+				cout << '*';
 			}
-			cout << endl;
 		}
-		cout << "Piece Taken:" << endl;
-		for (int i = 0; i < TakenPieceBlack.size(); i++)
-		{
-			PieceCast(TakenPieceBlack[i]);
-			cout << " ";
-		}
-		cout << endl;
-		for (int i = 0; i < TakenPieceWhite.size(); i++)
-		{
-			PieceCast(TakenPieceWhite[i]);
-			cout << " ";
-		}
-		cout << endl;
+		return;
+	}
 
+	void board::printBoard(const bool Heading, const bool UnicodeSupported) const
+	{
+		cout << "-----------------" << endl;
+		if (Heading == White)
+		{
+			cout << "  A B C D E F G H" << endl;
+			for (int_fast8_t i = 7; i >0 ; i--)
+			{
+				cout << i + 1;
+				for (int_fast8_t j = 0; j < 8; j++)
+				{
+					cout << " ";
+					printPiece(CurBoard[i * 8 + j], UnicodeSupported);
+				}
+				cout << i + 1 << " " << endl;
+			}
+			cout << "  A B C D E F G H" << endl;
+		}
+		else
+		{
+			cout << "  H G F E D C B A" << endl;
+			for (int_fast8_t i = 0; i < 8; i++)
+			{
+				cout << i + 1;
+				for (int_fast8_t j = 7; j > 0; j--)
+				{
+					cout << " ";
+					printPiece(CurBoard[i*8+j], UnicodeSupported);
+				}
+				cout << i + 1 << " " << endl;
+			}
+			cout << "  H G F E D C B A" << endl;
+		}
 		if (isBlackCheckmated())
 		{
 			cout << "White Wins" << endl;
@@ -205,1173 +237,379 @@
 		cout << "-----------------" << endl;
 
 	}
-	int board::getWhiteMaterialAdvantage() const
+
+	int_fast8_t board::getWhiteMaterialAdvantage() const
 	{
-		int BlackValueOnBoard = 0;
+		int_fast8_t WhiteAdv = 0;
 		int WhiteValueOnBoard = 0;
-		for (int row = 1; row < 9; row++)
+		for (uint_fast8_t i =0; i<64; i++ )
 		{
-			for (int col = 1; col < 9; col++)
+
+			switch (CurBoard[i])
 			{
-				switch (CurBoard[row][col])
-				{
-				case WhitePawn:
-					WhiteValueOnBoard += 1;
-					break;
-				case WhiteRook:
-					WhiteValueOnBoard += 5;
-					break;
-				case WhiteKnight:
-					WhiteValueOnBoard += 3;
-					break;
-				case WhiteBishop:
-					WhiteValueOnBoard += 3;
-					break;
-				case WhiteQueen:
-					WhiteValueOnBoard += 9;
-					break;
-				case BlackPawn:
-					BlackValueOnBoard += 1;
-					break;
-				case BlackRook:
-					BlackValueOnBoard += 5;
-					break;
-				case BlackKnight:
-					BlackValueOnBoard += 3;
-					break;
-				case BlackBishop:
-					BlackValueOnBoard += 3;
-					break;
-				case BlackQueen:
-					BlackValueOnBoard += 9;
-					break;
-				}
+			case Piece::WhitePawn:
+				WhiteAdv += 1;
+				break;
+			case Piece::WhiteRook:
+				WhiteAdv += 5;
+				break;
+			case Piece::WhiteKnight:
+				WhiteAdv += 3;
+				break;
+			case Piece::WhiteBishop:
+				WhiteAdv += 3;
+				break;
+			case Piece::WhiteQueen:
+				WhiteAdv += 9;
+				break;
+			case Piece::BlackPawn:
+				WhiteAdv -= 1;
+				break;
+			case Piece::BlackRook:
+				WhiteAdv -= 5;
+				break;
+			case Piece::BlackKnight:
+				WhiteAdv -= 3;
+				break;
+			case Piece::BlackBishop:
+				WhiteAdv -= 3;
+				break;
+			case Piece::BlackQueen:
+				WhiteAdv -= 9;
+				break;
 			}
 		}
-		return WhiteValueOnBoard - BlackValueOnBoard;
+		return WhiteAdv;
 	}
-	int board::getBlackMaterialAdvantage() const
+	int_fast8_t board::getBlackMaterialAdvantage() const
 	{
 		return 0 - getWhiteMaterialAdvantage();
 	}
-	bool board::isWhite(const int& row, const int& col) const
+	static inline bool isWhite(const Piece piece)
 	{
-		const char piece = CurBoard[row][col];
-		return (piece == 'r' || piece == 's' || piece == 'n' || piece == 'q' || piece == 'p' || piece == 'k');
+		return (piece & COLOR_MASK) == Piece::WHITE;
 	}
-	bool board::isBlack(const int& row, const int& col) const
+	static inline bool  isBlack(const Piece piece)
 	{
-		const char piece = CurBoard[row][col];
-		return (piece == 'R' || piece == 'S' || piece == 'N' ||	piece == 'Q' || piece == 'P' || piece == 'K');
+		return(piece & COLOR_MASK) == Piece::BLACK;
 	}
-	bool board::isInTheBoard(const int& row, const int& col) const
+	static inline bool isEmpty(const Piece piece)
 	{
-		return (row >= 1 && row <= 8 && col >= 1 && col <= 8);
+		return piece == Piece::Empty;
 	}
-	 vector<pair<int, int>> board::WhiteOccupiedSquares() const
+	static inline bool isInTheBoard(const Loc loc)
 	{
-		vector<pair<int, int>> result;
+		return loc < 64;
+	}
+	 vector<Loc> board::WhiteOccupiedSquares() const
+	{
+		vector<Loc> result;
 		result.reserve(16);
-		for (int row = 1; row < 9; row++)
+		for (uint8_t i = 0; i < 64; i++)
 		{
-			for (int col = 1; col < 9; col++)
-			{
-				if (isWhite(row, col))
-				{
-					result.push_back({ row,col });
-				}
-			}
+			if (isWhite(CurBoard[i]))
+				result.push_back((Loc)i);
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::BlackOccupiedSquares() const
+	vector<Loc> board::BlackOccupiedSquares() const
 	{
-		vector<pair<int, int>> result;
+		vector<Loc> result;
 		result.reserve(16);
-		for (int row = 1; row < 9; row++)
+		for (uint8_t i = 0; i < 64; i++)
 		{
-			for (int col = 1; col < 9; col++)
-			{
-				if (isBlack(row, col))
-				{
-					result.push_back({ row,col });
-				}
-			}
+			if (isBlack(CurBoard[i]))
+				result.push_back((Loc)i);
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::WhiteControlledSquares() const
+	vector<Loc> board::WhiteControlledSquares() const
 	{
-		vector<pair<int, int>> const WhitePieces = WhiteOccupiedSquares();
-		vector<pair<int, int>> result;
-		bool UpRowOpen;
-		bool DownRowOpen;
-		bool RightColOpen;
-		bool LeftColOpen;
-		bool UpRightOpen;
-		bool UpLeftOpen;
-		bool DownRightOpen;
-		bool DownLeftOpen;
-		int Index;
-		for (int i = 0; i < WhitePieces.size(); i++)
+		vector<Loc> const WhitePiecesLoc = WhiteOccupiedSquares();
+		vector<Loc> result;
+		const uint8_t RookDirection[4] = { 1,8,248,255 };
+		const uint8_t BishopDirection[4] = { 7,9,247,249 };
+		const uint8_t QueenDirection[8] = { 1,7,8,9,247,248,249,255 };
+		const uint8_t KnightMoves[8] = { 6,10,15,17,239,241,246,250 };
+
+		result.reserve(64);
+
+		bool Open;
+		Loc attemptLoc;
+
+		for (const Loc& PieceLoc:WhitePiecesLoc)
 		{
-			switch (CurBoard[WhitePieces[i].first][WhitePieces[i].second])
+			switch (CurBoard[PieceLoc])
 			{
-			case WhitePawn:
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second + 1))
+			case Piece::WhitePawn:
+				attemptLoc = PieceLoc + (uint8_t)9;
+				if (isInTheBoard(attemptLoc))
 				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second + 1 });
+					result.push_back(attemptLoc);
 				}
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second - 1))
+				attemptLoc = PieceLoc + (uint8_t)7;
+				if (isInTheBoard(attemptLoc))
 				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second - 1 });
+					result.push_back(attemptLoc);
 				}
 				break;
-			case WhiteRook:
-				UpRowOpen = true;
-				DownRowOpen = true;
-				RightColOpen = true;
-				LeftColOpen = true;
-				Index = WhitePieces[i].first + 1;
-				while (UpRowOpen)
+			case Piece::WhiteRook:
+				for (uint8_t direction : RookDirection)
 				{
-					if (Index < 9)
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
 					{
-						if (CurBoard[Index][WhitePieces[i].second] == Empty)
+						if (isInTheBoard(attemptLoc))
 						{
-							result.push_back({ Index,WhitePieces[i].second });
-							Index++;
-						}
-						else if (isWhite(Index, WhitePieces[i].second))
-						{
-							UpRowOpen = false;
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
 						}
 						else
 						{
-							result.push_back({ Index,WhitePieces[i].second });
-							UpRowOpen = false;
+							Open = false;
 						}
-					}
-					else
-					{
-						UpRowOpen = false;
-					}
-				}
-				Index = WhitePieces[i].first - 1;
-				while (DownRowOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[Index][WhitePieces[i].second] == Empty)
-						{
-							result.push_back({ Index,WhitePieces[i].second });
-							Index--;
-						}
-						else if (isWhite(Index, WhitePieces[i].second))
-						{
-							DownRowOpen = false;
-						}
-						else
-						{
-							result.push_back({ Index,WhitePieces[i].second });
-							DownRowOpen = false;
-						}
-					}
-					else
-					{
-						DownRowOpen = false;
-					}
-				}
-				Index = WhitePieces[i].second + 1;
-				while (RightColOpen)
-				{
-					if (Index < 9)
-					{
-						if (CurBoard[WhitePieces[i].first][Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first, Index))
-						{
-							RightColOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							RightColOpen = false;
-						}
-					}
-					else
-					{
-						RightColOpen = false;
-					}
-				}
-				Index = WhitePieces[i].second - 1;
-				while (LeftColOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[WhitePieces[i].first][Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							Index--;
-						}
-						else if (isWhite(WhitePieces[i].first, Index))
-						{
-							LeftColOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							LeftColOpen = false;
-						}
-					}
-					else
-					{
-						LeftColOpen = false;
 					}
 				}
 				break;
-			case WhiteKnight:
-				if (isInTheBoard(WhitePieces[i].first + 2, WhitePieces[i].second + 1))
+			case Piece::WhiteKnight:
+				for (uint8_t move : KnightMoves)
 				{
-					result.push_back({ WhitePieces[i].first + 2,WhitePieces[i].second + 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first + 2, WhitePieces[i].second - 1))
-				{
-					result.push_back({ WhitePieces[i].first + 2,WhitePieces[i].second - 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 2, WhitePieces[i].second + 1))
-				{
-					result.push_back({ WhitePieces[i].first - 2,WhitePieces[i].second + 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 2, WhitePieces[i].second - 1))
-				{
-					result.push_back({ WhitePieces[i].first - 2,WhitePieces[i].second - 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second + 2))
-				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second + 2 });
-				}
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second - 2))
-				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second - 2 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 1, WhitePieces[i].second + 2))
-				{
-					result.push_back({ WhitePieces[i].first - 1,WhitePieces[i].second + 2 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 1, WhitePieces[i].second - 2))
-				{
-					result.push_back({ WhitePieces[i].first - 1,WhitePieces[i].second - 2 });
-				}
-				break;
-			case WhiteBishop:
-				UpRightOpen = true;
-				UpLeftOpen = true;
-				DownRightOpen = true;
-				DownLeftOpen = true;
-				Index = 1;
-				while (UpRightOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first + Index, WhitePieces[i].second + Index))
+					attemptLoc = PieceLoc + move;
+					if (isInTheBoard(attemptLoc))
 					{
-						if (CurBoard[WhitePieces[i].first + Index][WhitePieces[i].second + Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second + Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first + Index, WhitePieces[i].second + Index))
-						{
-							UpRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second + Index });
-							UpRightOpen = false;
-						}
-					}
-					else
-					{
-						UpRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (UpLeftOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first + Index, WhitePieces[i].second - Index))
-					{
-						if (CurBoard[WhitePieces[i].first + Index][WhitePieces[i].second - Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second - Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first + Index, WhitePieces[i].second - Index))
-						{
-							UpLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second - Index });
-							UpLeftOpen = false;
-						}
-					}
-					else
-					{
-						UpLeftOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownRightOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first - Index, WhitePieces[i].second + Index))
-					{
-						if (CurBoard[WhitePieces[i].first - Index][WhitePieces[i].second + Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second + Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first - Index, WhitePieces[i].second + Index))
-						{
-							DownRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second + Index });
-							DownRightOpen = false;
-						}
-					}
-					else
-					{
-						DownRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownLeftOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first - Index, WhitePieces[i].second - Index))
-					{
-						if (CurBoard[WhitePieces[i].first - Index][WhitePieces[i].second - Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second - Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first - Index, WhitePieces[i].second - Index))
-						{
-							DownLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second - Index });
-							DownLeftOpen = false;
-						}
-					}
-					else
-					{
-						DownLeftOpen = false;
+						result.push_back(attemptLoc);
 					}
 				}
 				break;
-			case WhiteQueen:
-				UpRowOpen = true;
-				DownRowOpen = true;
-				RightColOpen = true;
-				LeftColOpen = true;
-				Index = WhitePieces[i].first + 1;
-				while (UpRowOpen)
+			case Piece::WhiteBishop:
+				for (uint8_t direction : BishopDirection)
 				{
-					if (Index < 9)
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
 					{
-						if (CurBoard[Index][WhitePieces[i].second] == Empty)
+						if (isInTheBoard(attemptLoc))
 						{
-							result.push_back({ Index,WhitePieces[i].second });
-							Index++;
-						}
-						else if (isWhite(Index, WhitePieces[i].second))
-						{
-							UpRowOpen = false;
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
 						}
 						else
 						{
-							result.push_back({ Index,WhitePieces[i].second });
-							UpRowOpen = false;
+							Open = false;
 						}
-					}
-					else
-					{
-						UpRowOpen = false;
-					}
-				}
-				Index = WhitePieces[i].first - 1;
-				while (DownRowOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[Index][WhitePieces[i].second] == Empty)
-						{
-							result.push_back({ Index,WhitePieces[i].second });
-							Index--;
-						}
-						else if (isWhite(Index, WhitePieces[i].second))
-						{
-							DownRowOpen = false;
-						}
-						else
-						{
-							result.push_back({ Index,WhitePieces[i].second });
-							DownRowOpen = false;
-						}
-					}
-					else
-					{
-						DownRowOpen = false;
-					}
-				}
-				Index = WhitePieces[i].second + 1;
-				while (RightColOpen)
-				{
-					if (Index < 9)
-					{
-						if (CurBoard[WhitePieces[i].first][Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first, Index))
-						{
-							RightColOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							RightColOpen = false;
-						}
-					}
-					else
-					{
-						RightColOpen = false;
-					}
-				}
-				Index = WhitePieces[i].second - 1;
-				while (LeftColOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[WhitePieces[i].first][Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							Index--;
-						}
-						else if (isWhite(WhitePieces[i].first, Index))
-						{
-							LeftColOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first,Index });
-							LeftColOpen = false;
-						}
-					}
-					else
-					{
-						LeftColOpen = false;
-					}
-				}
-				UpRightOpen = true;
-				UpLeftOpen = true;
-				DownRightOpen = true;
-				DownLeftOpen = true;
-				Index = 1;
-				while (UpRightOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first + Index, WhitePieces[i].second + Index))
-					{
-						if (CurBoard[WhitePieces[i].first + Index][WhitePieces[i].second + Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second + Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first + Index, WhitePieces[i].second + Index))
-						{
-							UpRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second + Index });
-							UpRightOpen = false;
-						}
-					}
-					else
-					{
-						UpRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (UpLeftOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first + Index, WhitePieces[i].second - Index))
-					{
-						if (CurBoard[WhitePieces[i].first + Index][WhitePieces[i].second - Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second - Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first + Index, WhitePieces[i].second - Index))
-						{
-							UpLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first + Index,WhitePieces[i].second - Index });
-							UpLeftOpen = false;
-						}
-					}
-					else
-					{
-						UpLeftOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownRightOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first - Index, WhitePieces[i].second + Index))
-					{
-						if (CurBoard[WhitePieces[i].first - Index][WhitePieces[i].second + Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second + Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first - Index, WhitePieces[i].second + Index))
-						{
-							DownRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second + Index });
-							DownRightOpen = false;
-						}
-					}
-					else
-					{
-						DownRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownLeftOpen)
-				{
-					if (isInTheBoard(WhitePieces[i].first - Index, WhitePieces[i].second - Index))
-					{
-						if (CurBoard[WhitePieces[i].first - Index][WhitePieces[i].second - Index] == Empty)
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second - Index });
-							Index++;
-						}
-						else if (isWhite(WhitePieces[i].first - Index, WhitePieces[i].second - Index))
-						{
-							DownLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ WhitePieces[i].first - Index,WhitePieces[i].second - Index });
-							DownLeftOpen = false;
-						}
-					}
-					else
-					{
-						DownLeftOpen = false;
 					}
 				}
 				break;
-			case WhiteKing:
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second))
+			case Piece::WhiteQueen:
+				for (uint8_t direction : QueenDirection)
 				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second });
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
+					{
+						if (isInTheBoard(attemptLoc))
+						{
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
+						}
+						else
+						{
+							Open = false;
+						}
+					}
 				}
-				if (isInTheBoard(WhitePieces[i].first - 1, WhitePieces[i].second))
+				break;
+			case Piece::WhiteKing:
+				for (uint8_t move : QueenDirection)
 				{
-					result.push_back({ WhitePieces[i].first - 1,WhitePieces[i].second });
-				}
-				if (isInTheBoard(WhitePieces[i].first, WhitePieces[i].second + 1))
-				{
-					result.push_back({ WhitePieces[i].first,WhitePieces[i].second + 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first, WhitePieces[i].second - 1))
-				{
-					result.push_back({ WhitePieces[i].first,WhitePieces[i].second - 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second + 1))
-				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second + 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first + 1, WhitePieces[i].second - 1))
-				{
-					result.push_back({ WhitePieces[i].first + 1,WhitePieces[i].second - 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 1, WhitePieces[i].second + 1))
-				{
-					result.push_back({ WhitePieces[i].first - 1,WhitePieces[i].second + 1 });
-				}
-				if (isInTheBoard(WhitePieces[i].first - 1, WhitePieces[i].second - 1))
-				{
-					result.push_back({ WhitePieces[i].first - 1,WhitePieces[i].second - 1 });
+					attemptLoc = PieceLoc + move;
+					if (isInTheBoard(attemptLoc))
+					{
+						result.push_back(attemptLoc);
+					}
 				}
 				break;
 			}
 		}
 		return result;
 	}
-	vector<pair<int, int>> board::BlackControlledSquares() const
+
+	vector<Loc> board::BlackControlledSquares() const
 	{
-		vector<pair<int, int>> BlackPieces = BlackOccupiedSquares();
-		vector<pair<int, int>> result;
-		bool UpRowOpen;
-		bool DownRowOpen;
-		bool RightColOpen;
-		bool LeftColOpen;
-		bool UpRightOpen;
-		bool UpLeftOpen;
-		bool DownRightOpen;
-		bool DownLeftOpen;
-		int Index;
-		for (int i = 0; i < BlackPieces.size(); i++)
+		vector<Loc> const BlackPieceLoc = BlackOccupiedSquares();
+		vector<Loc> result;
+		const uint8_t RookDirection[4] = { 1,8,248,255 };
+		const uint8_t BishopDirection[4] = { 7,9,247,249 };
+		const uint8_t QueenDirection[8] = { 1,7,8,9,247,248,249,255 };
+		const uint8_t KnightMoves[8] = { 6,10,15,17,239,241,246,250 };
+
+		result.reserve(64);
+
+		bool Open;
+		Loc attemptLoc;
+
+		for (const Loc& PieceLoc : BlackPieceLoc)
 		{
-			switch (CurBoard[BlackPieces[i].first][BlackPieces[i].second])
+			switch (CurBoard[PieceLoc])
 			{
-			case BlackPawn:
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second + 1))
+			case Piece::BlackPawn:
+				attemptLoc = PieceLoc + (uint8_t)247;
+				if (isInTheBoard(attemptLoc))
 				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second + 1 });
+					result.push_back(attemptLoc);
 				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second - 1))
+				attemptLoc = PieceLoc + (uint8_t)249;
+				if (isInTheBoard(attemptLoc))
 				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second - 1 });
+					result.push_back(attemptLoc);
 				}
 				break;
-			case BlackRook:
-				UpRowOpen = true;
-				DownRowOpen = true;
-				RightColOpen = true;
-				LeftColOpen = true;
-				Index = BlackPieces[i].first + 1;
-				while (UpRowOpen)
+			case Piece::BlackRook:
+				for (uint8_t direction : RookDirection)
 				{
-					if (Index < 9)
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
 					{
-						if (CurBoard[Index][BlackPieces[i].second] == Empty)
+						if (isInTheBoard(attemptLoc))
 						{
-							result.push_back({ Index,BlackPieces[i].second });
-							Index++;
-						}
-						else if (isBlack(Index, BlackPieces[i].second))
-						{
-							UpRowOpen = false;
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
 						}
 						else
 						{
-							result.push_back({ Index,BlackPieces[i].second });
-							UpRowOpen = false;
+							Open = false;
 						}
-					}
-					else
-					{
-						UpRowOpen = false;
-					}
-				}
-				Index = BlackPieces[i].first - 1;
-				while (DownRowOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[Index][BlackPieces[i].second] == Empty)
-						{
-							result.push_back({ Index,BlackPieces[i].second });
-							Index--;
-						}
-						else if (isBlack(Index, BlackPieces[i].second))
-						{
-							DownRowOpen = false;
-						}
-						else
-						{
-							result.push_back({ Index,BlackPieces[i].second });
-							DownRowOpen = false;
-						}
-					}
-					else
-					{
-						DownRowOpen = false;
-					}
-				}
-				Index = BlackPieces[i].second + 1;
-				while (RightColOpen)
-				{
-					if (Index < 9)
-					{
-						if (CurBoard[BlackPieces[i].first][Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first, Index))
-						{
-							RightColOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							RightColOpen = false;
-						}
-					}
-					else
-					{
-						RightColOpen = false;
-					}
-				}
-				Index = BlackPieces[i].second - 1;
-				while (LeftColOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[BlackPieces[i].first][Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							Index--;
-						}
-						else if (isBlack(BlackPieces[i].first, Index))
-						{
-							LeftColOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							LeftColOpen = false;
-						}
-					}
-					else
-					{
-						LeftColOpen = false;
 					}
 				}
 				break;
-			case BlackKnight:
-				if (isInTheBoard(BlackPieces[i].first + 2, BlackPieces[i].second + 1))
+			case Piece::BlackKnight:
+				for (uint8_t move : KnightMoves)
 				{
-					result.push_back({ BlackPieces[i].first + 2,BlackPieces[i].second + 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first + 2, BlackPieces[i].second - 1))
-				{
-					result.push_back({ BlackPieces[i].first + 2,BlackPieces[i].second - 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 2, BlackPieces[i].second + 1))
-				{
-					result.push_back({ BlackPieces[i].first - 2,BlackPieces[i].second + 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 2, BlackPieces[i].second - 1))
-				{
-					result.push_back({ BlackPieces[i].first - 2,BlackPieces[i].second - 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first + 1, BlackPieces[i].second + 2))
-				{
-					result.push_back({ BlackPieces[i].first + 1,BlackPieces[i].second + 2 });
-				}
-				if (isInTheBoard(BlackPieces[i].first + 1, BlackPieces[i].second - 2))
-				{
-					result.push_back({ BlackPieces[i].first + 1,BlackPieces[i].second - 2 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second + 2))
-				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second + 2 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second - 2))
-				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second - 2 });
-				}
-				break;
-			case BlackBishop:
-				UpRightOpen = true;
-				UpLeftOpen = true;
-				DownRightOpen = true;
-				DownLeftOpen = true;
-				Index = 1;
-				while (UpRightOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first + Index, BlackPieces[i].second + Index))
+					attemptLoc = PieceLoc + move;
+					if (isInTheBoard(attemptLoc))
 					{
-						if (CurBoard[BlackPieces[i].first + Index][BlackPieces[i].second + Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second + Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first + Index, BlackPieces[i].second + Index))
-						{
-							UpRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second + Index });
-							UpRightOpen = false;
-						}
-					}
-					else
-					{
-						UpRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (UpLeftOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first + Index, BlackPieces[i].second - Index))
-					{
-						if (CurBoard[BlackPieces[i].first + Index][BlackPieces[i].second - Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second - Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first + Index, BlackPieces[i].second - Index))
-						{
-							UpLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second - Index });
-							UpLeftOpen = false;
-						}
-					}
-					else
-					{
-						UpLeftOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownRightOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first - Index, BlackPieces[i].second + Index))
-					{
-						if (CurBoard[BlackPieces[i].first - Index][BlackPieces[i].second + Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second + Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first - Index, BlackPieces[i].second + Index))
-						{
-							DownRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second + Index });
-							DownRightOpen = false;
-						}
-					}
-					else
-					{
-						DownRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownLeftOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first - Index, BlackPieces[i].second - Index))
-					{
-						if (CurBoard[BlackPieces[i].first - Index][BlackPieces[i].second - Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second - Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first - Index, BlackPieces[i].second - Index))
-						{
-							DownLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second - Index });
-							DownLeftOpen = false;
-						}
-					}
-					else
-					{
-						DownLeftOpen = false;
+						result.push_back(attemptLoc);
 					}
 				}
 				break;
-			case BlackQueen:
-				UpRowOpen = true;
-				DownRowOpen = true;
-				RightColOpen = true;
-				LeftColOpen = true;
-				Index = BlackPieces[i].first + 1;
-				while (UpRowOpen)
+			case Piece::BlackBishop:
+				for (uint8_t direction : BishopDirection)
 				{
-					if (Index < 9)
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
 					{
-						if (CurBoard[Index][BlackPieces[i].second] == Empty)
+						if (isInTheBoard(attemptLoc))
 						{
-							result.push_back({ Index,BlackPieces[i].second });
-							Index++;
-						}
-						else if (isBlack(Index, BlackPieces[i].second))
-						{
-							UpRowOpen = false;
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
 						}
 						else
 						{
-							result.push_back({ Index,BlackPieces[i].second });
-							UpRowOpen = false;
+							Open = false;
 						}
-					}
-					else
-					{
-						UpRowOpen = false;
-					}
-				}
-				Index = BlackPieces[i].first - 1;
-				while (DownRowOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[Index][BlackPieces[i].second] == Empty)
-						{
-							result.push_back({ Index,BlackPieces[i].second });
-							Index--;
-						}
-						else if (isBlack(Index, BlackPieces[i].second))
-						{
-							DownRowOpen = false;
-						}
-						else
-						{
-							result.push_back({ Index,BlackPieces[i].second });
-							DownRowOpen = false;
-						}
-					}
-					else
-					{
-						DownRowOpen = false;
-					}
-				}
-				Index = BlackPieces[i].second + 1;
-				while (RightColOpen)
-				{
-					if (Index < 9)
-					{
-						if (CurBoard[BlackPieces[i].first][Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first, Index))
-						{
-							RightColOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							RightColOpen = false;
-						}
-					}
-					else
-					{
-						RightColOpen = false;
-					}
-				}
-				Index = BlackPieces[i].second - 1;
-				while (LeftColOpen)
-				{
-					if (Index > 0)
-					{
-						if (CurBoard[BlackPieces[i].first][Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							Index--;
-						}
-						else if (isBlack(BlackPieces[i].first, Index))
-						{
-							LeftColOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first,Index });
-							LeftColOpen = false;
-						}
-					}
-					else
-					{
-						LeftColOpen = false;
-					}
-				}
-				UpRightOpen = true;
-				UpLeftOpen = true;
-				DownRightOpen = true;
-				DownLeftOpen = true;
-				Index = 1;
-				while (UpRightOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first + Index, BlackPieces[i].second + Index))
-					{
-						if (CurBoard[BlackPieces[i].first + Index][BlackPieces[i].second + Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second + Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first + Index, BlackPieces[i].second + Index))
-						{
-							UpRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second + Index });
-							UpRightOpen = false;
-						}
-					}
-					else
-					{
-						UpRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (UpLeftOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first + Index, BlackPieces[i].second - Index))
-					{
-						if (CurBoard[BlackPieces[i].first + Index][BlackPieces[i].second - Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second - Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first + Index, BlackPieces[i].second - Index))
-						{
-							UpLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first + Index,BlackPieces[i].second - Index });
-							UpLeftOpen = false;
-						}
-					}
-					else
-					{
-						UpLeftOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownRightOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first - Index, BlackPieces[i].second + Index))
-					{
-						if (CurBoard[BlackPieces[i].first - Index][BlackPieces[i].second + Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second + Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first - Index, BlackPieces[i].second + Index))
-						{
-							DownRightOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second + Index });
-							DownRightOpen = false;
-						}
-					}
-					else
-					{
-						DownRightOpen = false;
-					}
-				}
-				Index = 1;
-				while (DownLeftOpen)
-				{
-					if (isInTheBoard(BlackPieces[i].first - Index, BlackPieces[i].second - Index))
-					{
-						if (CurBoard[BlackPieces[i].first - Index][BlackPieces[i].second - Index] == Empty)
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second - Index });
-							Index++;
-						}
-						else if (isBlack(BlackPieces[i].first - Index, BlackPieces[i].second - Index))
-						{
-							DownLeftOpen = false;
-						}
-						else
-						{
-							result.push_back({ BlackPieces[i].first - Index,BlackPieces[i].second - Index });
-							DownLeftOpen = false;
-						}
-					}
-					else
-					{
-						DownLeftOpen = false;
 					}
 				}
 				break;
-			case BlackKing:
-				if (isInTheBoard(BlackPieces[i].first + 1, BlackPieces[i].second))
+			case Piece::BlackQueen:
+				for (uint8_t direction : QueenDirection)
 				{
-					result.push_back({ BlackPieces[i].first + 1,BlackPieces[i].second });
+					Open = true;
+					attemptLoc = PieceLoc + direction;
+					while (Open)
+					{
+						if (isInTheBoard(attemptLoc))
+						{
+							if (isLocEmpty(attemptLoc))
+							{
+								result.push_back(attemptLoc);
+								attemptLoc += direction;
+							}
+							else
+							{
+								result.push_back(attemptLoc);
+								Open = false;
+							}
+						}
+						else
+						{
+							Open = false;
+						}
+					}
 				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second))
+				break;
+			case Piece::BlackKing:
+				for (uint8_t move : QueenDirection)
 				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second });
-				}
-				if (isInTheBoard(BlackPieces[i].first, BlackPieces[i].second + 1))
-				{
-					result.push_back({ BlackPieces[i].first,BlackPieces[i].second + 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first, BlackPieces[i].second - 1))
-				{
-					result.push_back({ BlackPieces[i].first,BlackPieces[i].second - 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first + 1, BlackPieces[i].second + 1))
-				{
-					result.push_back({ BlackPieces[i].first + 1,BlackPieces[i].second + 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first + 1, BlackPieces[i].second - 1))
-				{
-					result.push_back({ BlackPieces[i].first + 1,BlackPieces[i].second - 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second + 1))
-				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second + 1 });
-				}
-				if (isInTheBoard(BlackPieces[i].first - 1, BlackPieces[i].second - 1))
-				{
-					result.push_back({ BlackPieces[i].first - 1,BlackPieces[i].second - 1 });
+					attemptLoc = PieceLoc + move;
+					if (isInTheBoard(attemptLoc))
+					{
+						result.push_back(attemptLoc);
+					}
 				}
 				break;
 			}
 		}
 		return result;
 	}
-	bool board::isWhiteControlled(int row, int col) const
+	bool board::isWhiteControlled(Loc loc) const
 	{
-		vector<pair<int, int>> WhiteControlled = WhiteControlledSquares();
-		for (int i = 0; i < WhiteControlled.size(); i++)
-		{
-			if (WhiteControlled[i].first == row && WhiteControlled[i].second == col)
-			{
-				return true;
-			}
-		}
-		return false;
+		const vector<Loc> WhiteControlled = WhiteControlledSquares();
+		return std::find(WhiteControlled.begin(), WhiteControlled.end(), loc) != WhiteControlled.end();
 	}
-	bool board::isBlackControlled(int row, int col) const
+	bool board::isBlackControlled(Loc loc) const
 	{
-		vector<pair<int, int>> BlackControlled = BlackControlledSquares();
-		for (int i = 0; i < BlackControlled.size(); i++)
-		{
-			if (BlackControlled[i].first == row && BlackControlled[i].second == col)
-			{
-				return true;
-			}
-		}
-		return false;
+		const vector<Loc> BlackControlled = BlackControlledSquares();
+		return std::find(BlackControlled.begin(), BlackControlled.end(), loc) != BlackControlled.end();
 	}
 	bool board::isWhiteChecked() const
 	{
-		vector<pair<int, int>> BlackControlled = BlackControlledSquares();
-		for (int i = 0; i < BlackControlled.size(); i++)
+		const vector<Loc> BlackControlled = BlackControlledSquares();
+		for (const Loc& loc : BlackControlled)
 		{
-			if (CurBoard[BlackControlled[i].first][BlackControlled[i].second] == WhiteKing)
+			if ( CurBoard[loc] == WhiteKing)
 			{
 				return true;
 			}
@@ -1380,29 +618,29 @@
 	}
 	bool board::isBlackChecked() const
 	{
-		vector<pair<int, int>> WhiteControlled = WhiteControlledSquares();
-		for (int i = 0; i < WhiteControlled.size(); i++)
+		const vector<Loc> WhiteControlled = WhiteControlledSquares();
+		for (const Loc& loc : WhiteControlled)
 		{
-			if (CurBoard[WhiteControlled[i].first][WhiteControlled[i].second] == BlackKing)
+			if (CurBoard[loc] == BlackKing)
 			{
 				return true;
 			}
 		}
 		return false;
 	}
-	bool board::willWhiteBeChecked(int row, int col, int newRow, int newCol) const
+	bool board::willWhiteBeChecked(pair<Loc,Loc> move) const
 	{ 
 		board NewBoard = *this;
-		NewBoard.moveNoCheck(row, col, newRow, newCol);
+		NewBoard.moveNoCheck(move);
 		return NewBoard.isWhiteChecked();
 	}
-	bool board::willBlackBeChecked(int row, int col, int newRow, int newCol) const
+	bool board::willBlackBeChecked(pair<Loc, Loc> move) const
 	{
 		board NewBoard = *this;
-		NewBoard.moveNoCheck(row, col, newRow, newCol);
+		NewBoard.moveNoCheck(move);
 		return NewBoard.isBlackChecked();
 	}
-	bool board::isWhiteCheckmated()
+	bool board::isWhiteCheckmated() const
 	{
 		if (!isWhiteChecked())
 		{
@@ -1410,7 +648,7 @@
 		}
 		else
 		{
-			vector<pair<int, int>> WhitePieces = WhiteOccupiedSquares();
+			vector<Loc> WhitePieces = WhiteOccupiedSquares();
 			for (int i = 0; i < WhitePieces.size(); i++)
 			{
 				vector<pair<int, int>> PossibleMoves = getPossibleMoves(WhitePieces[i].first, WhitePieces[i].second);
