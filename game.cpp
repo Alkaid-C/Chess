@@ -11,9 +11,7 @@ static void testGame3();
 static void testGame4();
 static void twoPlayerGame();
 char static ColCast(int col);
-static pair<pair<int, int>, pair<int, int>> AskForMove();
-static void PlayWithComputer();
-static void RunTimeBenchmark(int depth, int round);
+static pair<Loc, Loc> AskForMove();
 
 int main()
 {
@@ -30,7 +28,6 @@ int main()
 	}
 	if (choice == 2)
 	{
-		PlayWithComputer;
 	}
 	if (choice == 3)
 	{
@@ -40,7 +37,6 @@ int main()
 		int round=1;
 		cout << "You want to repeat benckmark for how many rounds?" << endl;
 		cin >> round;
-		RunTimeBenchmark(depth, round);
 	}
 }
 
@@ -66,7 +62,7 @@ char static ColCast(int col)
 		return 'H';
 	}
 }
-
+/*
 static void testGame1()
 {
 	board theboard;
@@ -229,99 +225,81 @@ static void testGame4()
 	theboard.printBoard();
 	return;
 }
-
+*/
 static void twoPlayerGame()
 {
 	board theboard;
-	theboard.printBoard();
-	while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+	theboard.printBoard(false,false);
+	while (true)
 	{
-		if (theboard.mover == White)
+		if (theboard.player == White)
 		{
-			cout << "White's turn" << endl;
+			std::cout << "White's turn" << endl;
 		}
 		else
 		{
-			cout << "Black's turn" << endl;
+			std::cout << "Black's turn" << endl;
 		}
-		pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
-		theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
-		theboard.printBoard();
+		pair<Loc,Loc> userMove = AskForMove();
+		theboard.MoveByHuman(userMove);
+		theboard.printBoard(false,false);
 	}
-	theboard.printBoard();
+	theboard.printBoard(false,false);
 	return;
 }
 
+Loc decodeLoc(const std::string& notation) {
+	if (notation.length() != 2) {
+		// Invalid notation length
+		throw std::invalid_argument("Chess notation must be exactly 2 characters");
+	}
 
-static pair<pair<int, int>, pair<int, int>> AskForMove()
+	char file = notation[0];
+	char rank = notation[1];
+
+	// Convert file (column) to 0-7
+	int fileIndex;
+	if (file >= 'A' && file <= 'H') {
+		fileIndex = file - 'A';
+	}
+	else if (file >= 'a' && file <= 'h') {
+		fileIndex = file - 'a';
+	}
+	else {
+		throw std::invalid_argument("Invalid file (must be A-H or a-h)");
+	}
+
+	// Convert rank (row) to 0-7
+	int rankIndex;
+	if (rank >= '1' && rank <= '8') {
+		rankIndex = rank - '1';
+	}
+	else {
+		throw std::invalid_argument("Invalid rank (must be 1-8)");
+	}
+
+	// Calculate the location index based on our enum layout
+	int index = rankIndex * 8 + fileIndex;
+
+	return static_cast<Loc>(index);
+}
+
+static pair<Loc,Loc> AskForMove()
 {
 	string piece;
 	string target;
-	int row;
-	int col;
-	int newRow;
-	int newCol;
-	bool moveIsLegal = false;
-	cout <<"Enter the location of your piece and target (e.g. 2D 4D)" << endl;
-	cin >> piece;
-	cin >> target;
-	try
-	{
-		if (isdigit(piece[0]))
-		{
-			row = piece[0] - '0';
-			col = piece[1] - 'A' + 1;
-			if (col > 8 || col < 0)
-			{
-				col = piece[1] - 'a' + 1;
-			}
-		}
-		else
-		{
-			row = piece[1] - '0';
-			col = piece[0] - 'A' + 1;
-			if (col > 8 || col < 0)
-			{
-				col = piece[0] - 'a' + 1;
-			}
-		}
-		if (isdigit(target[0]))
-		{
-			newRow = target[0] - '0';
-			newCol = target[1] - 'A' + 1;
-			if (newCol > 8 || newCol < 0)
-			{
-				newCol = target[1] - 'a' + 1;
-			}
-		}
-		else
-		{
-			newRow = target[1] - '0';
-			newCol = target[0] - 'A' + 1;
-			if (newCol > 8 || newCol < 0)
-			{
-				newCol = target[0] - 'a' + 1;
-			}
-		}
-		if (row > 8 || row < 1 || col > 8 || col < 1 || newRow > 8 || newRow < 1 || newCol > 8 || newCol < 1)
-		{
-			throw "Invalid Move";
-		}
-		return { {row,col},{newRow,newCol} };
-	}
-	catch (...)
-	{
-		cout << "Invalid input, please try again" << endl;
-		return AskForMove();
-	}
+	std::cout <<"Enter the location of your piece and target (e.g. 2D 4D)" << endl;
+	std::cin >> piece;
+	std::cin >> target;
+	return { decodeLoc(piece),decodeLoc(target) };
 }
-
+/*
 static void PlayWithComputer()
 {
 	int depth;
 	board theboard;
-	theboard.PromptForUnicodeSupport();
-	theboard.printBoard();
+	bool unicode=PromptForUnicodeSupport();
+	theboard.printBoard(false, unicode);
 	cout << "Computer Smarterness: (Recommended is  4. If you set it to 5, it will take several minutes to compute in complex situation. Type 0 for dynamic depth, which will think 5 steps in simple situation and 4 steps in complex situation to keep compute time no more than a minute)" << endl;
 	cin >> depth;
 	cout << "You want to play: (B/W)" << endl;
@@ -330,10 +308,10 @@ static void PlayWithComputer()
 	if (user == 'W')
 	{
 		system("cls");
-		theboard.printBoard();
-		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+		theboard.printBoard(false, unicode);
+		while (true)
 		{
-			if (theboard.mover == Black)
+			if (theboard.player == Black)
 			{
 				cout << "Computer is thinking..." << endl;
 				using namespace std::chrono;
@@ -341,12 +319,12 @@ static void PlayWithComputer()
 				high_resolution_clock::time_point begin;
 				high_resolution_clock::time_point finish;
 				begin = high_resolution_clock::now();
-				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findBlackBestMove(depth);
+				pair<Loc,Loc> bestMove = theboard.findBlackBestMove(depth);
 				finish = high_resolution_clock::now();
 				consume += duration_cast<duration<double>>(finish - begin) ;
-				cout << "After thinking for "<< consume.count() << " seconds, the computer plays : " << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
-				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
-				theboard.printBoard();
+				cout << "After thinking for " << consume.count() << " seconds, the computer plays : " << endl;
+				theboard.MoveByEngine(bestMove);
+				theboard.printBoard(false,unicode);
 			}
 			else
 			{
@@ -399,6 +377,7 @@ static void PlayWithComputer()
 	}
 	cout << "Game Over" << endl;
 }
+
 static void RunTimeBenchmark(int depth, int round)
 {
 
@@ -463,3 +442,4 @@ static void RunTimeBenchmark(int depth, int round)
 	cout << "Board3(W): " << currrent3.count() << "s" << endl;
 	cout << "Board4(B): " << currrent4.count() << "s" << endl;
 }
+*/

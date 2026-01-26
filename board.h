@@ -1,6 +1,5 @@
 #include<stdint.h>
-#define White true
-#define Black false
+
 #pragma once
 
 #include <vector>
@@ -10,14 +9,13 @@
 #define _BOARD_H
 using namespace std;
 
-#define A 1
-#define B 2
-#define C 3
-#define D 4
-#define E 5
-#define F 6
-#define G 7
-#define H 8
+
+
+enum Player : bool
+{
+	White = true,
+	Black = false
+};
 
 enum Piece : uint8_t 
 {
@@ -31,7 +29,7 @@ enum Piece : uint8_t
 
 	Pawn = 0x01,
 	Knight = 0x02,
-	Biship = 0x03,
+	Bishop = 0x03,
 	Rook = 0x04,
 	Queen = 0x05,
 	King = 0x06,
@@ -50,25 +48,60 @@ enum Piece : uint8_t
 	BlackQueen = 0x25,
 	BlackKing = 0x26,
 };
-
 inline bool isWhite(const Piece piece) { return (piece & COLOR_MASK) == Piece::WHITE; }
 inline bool isBlack(const Piece piece) { return (piece & COLOR_MASK) == Piece::BLACK; }
 inline bool isEmpty(const Piece piece) { return piece == Piece::Empty; }
+inline bool isPawn(const Piece piece) { return (piece & TYPE_MASK) == Piece::Pawn; }
+inline bool isKnight(const Piece piece) { return (piece & TYPE_MASK) == Piece::Knight; }
+inline bool isBishop(const Piece piece) { return (piece & TYPE_MASK) == Piece::Bishop; }
+inline bool isRook(const Piece piece) { return (piece & TYPE_MASK) == Piece::Rook; }
+inline bool isQueen(const Piece piece) { return (piece & TYPE_MASK) == Piece::Queen; }
+inline bool isKing(const Piece piece) { return (piece & TYPE_MASK) == Piece::King; }
 
+enum Rank : uint8_t
+{
+	Rank1 = 0,
+	Rank2 = 1,
+	Rank3 = 2,
+	Rnak4 = 4,
+	Rank5 = 4,
+	Rank6 = 5,
+	Rank7 = 6,
+	Rank8 = 7
+};
+enum File : uint8_t
+{
+	FileA = 0,
+	FileB = 1,
+	FileC = 2,
+	FileD = 4,
+	FileE = 4,
+	FileF = 5,
+	FileG = 6,
+	FileH = 7
+};
 enum Loc : uint8_t 
 {
-	A1 = 0, A2 = 1, A3 = 2, A4 = 3, A5 = 4, A6 = 5, A7 = 6, A8 = 7,
-	B1 = 8, B2 = 9, B3 = 10, B4 = 11, B5 = 12, B6 = 13, B7 = 14, B8 = 15,
-	C1 = 16, C2 = 17, C3 = 18, C4 = 19, C5 = 20, C6 = 21, C7 = 22, C8 = 23,
-	D1 = 24, D2 = 25, D3 = 26, D4 = 27, D5 = 28, D6 = 29, D7 = 30, D8 = 31,
-	E1 = 32, E2 = 33, E3 = 34, E4 = 35, E5 = 36, E6 = 37, E7 = 38, E8 = 39,
-	F1 = 40, F2 = 41, F3 = 42, F4 = 43, F5 = 44, F6 = 45, F7 = 46, F8 = 47,
-	G1 = 48, G2 = 49, G3 = 50, G4 = 51, G5 = 52, G6 = 53, G7 = 54, G8 = 55,
-	H1 = 56, H2 = 57, H3 = 58, H4 = 59, H5 = 60, H6 = 61, H7 = 62, H8 = 63
+	A1 = 000, B1 = 001, C1 = 002, D1 = 003, E1 = 004, F1 = 005, G1 = 006, H1 = 007,
+	A2 = 010, B2 = 011, C2 = 012, D2 = 013, E2 = 014, F2 = 015, G2 = 016, H2 = 017,
+	A3 = 020, B3 = 021, C3 = 022, D3 = 023, E3 = 024, F3 = 025, G3 = 026, H3 = 027,
+	A4 = 030, B4 = 031, C4 = 032, D4 = 033, E4 = 034, F4 = 035, G4 = 036, H4 = 037,
+	A5 = 040, B5 = 041, C5 = 042, D5 = 043, E5 = 044, F5 = 045, G5 = 046, H5 = 047,
+	A6 = 050, B6 = 051, C6 = 052, D6 = 053, E6 = 054, F6 = 055, G6 = 056, H6 = 057,
+	A7 = 060, B7 = 061, C7 = 062, D7 = 063, E7 = 064, F7 = 065, G7 = 066, H7 = 067,
+	A8 = 070, B8 = 071, C8 = 072, D8 = 073, E8 = 074, F8 = 075, G8 = 076, H8 = 077,
+	IrregularMoveTag=0xFF
 };
+const uint8_t RookDirection[4] = { 1,8,248,255 };
+const uint8_t BishopDirection[4] = { 7,9,247,249 };
+const uint8_t QueenDirection[8] = { 1,7,8,9,247,248,249,255 };
+const uint8_t KnightMoves[8] = { 6,10,15,17,239,241,246,250 };
 inline bool isInTheBoard(const Loc loc) { return loc < 64; }
 inline Loc operator+(const Loc loc, const uint8_t offset) { return static_cast<Loc>(static_cast<uint8_t>(loc) + static_cast<uint8_t>(offset)); }
 inline Loc& operator+=(Loc& loc, const uint8_t offset) { return loc = static_cast<Loc>(static_cast<uint8_t>(loc) + static_cast<uint8_t>(offset)); }
+inline uint8_t getRank(const Loc loc) { return loc >> 3; }
+inline uint8_t getFile(const Loc loc) { return loc & 07; }
+inline Loc getLoc(uint8_t rank, uint8_t file) { return (Loc)(rank * 8 + file); }
 
 
 class board 
@@ -77,18 +110,21 @@ public:
 	Piece CurBoard[64];
 	vector<Piece> TakenPieceBlack;
 	vector<Piece> TakenPieceWhite;
-	bool WhiteCastleKingSideQualified;
-	bool WhiteCastleQueenSideQualified;
-	bool BlackCastleKingSideQualified;
-	bool BlackCastleQueenSideQualified;
-	bool mover;
-	pair<pair<Loc,Loc>,Piece> LastMove;
+	bool CastlingQualified[4];//BlackKingSide,BlackQueenSide,WhiteKingSide,WhiteQueenside
+	Player player;
+	pair<Loc,Loc> LastMove;
 
 	board();
 	board(const board& theboard);
-	inline bool isLocWhite(Loc loc) const;
-	inline bool isLocBlack(Loc loc) const;
-	inline bool isLocEmpty(Loc loc) const;
+	inline bool isLocWhite(Loc loc) const { return isWhite(CurBoard[loc]); }
+	inline bool isLocBlack(Loc loc) const { return isBlack(CurBoard[loc]); }
+	inline bool isLocPawn(const Loc loc) const { return isPawn(CurBoard[loc]); }
+	inline bool isLocKnight(const Loc loc) const { return isKnight(CurBoard[loc]); }
+	inline bool isLocBishop(const Loc loc) const { return isBishop(CurBoard[loc]); }
+	inline bool isLocRook(const Loc loc) const { return isRook(CurBoard[loc]); }
+	inline bool isLocQueen(const Loc loc) const { return isQueen(CurBoard[loc]); }
+	inline bool isLocKing(const Loc loc) const { return isKing(CurBoard[loc]); }
+	inline bool isLocEmpty(const Loc loc) const { return isEmpty(CurBoard[loc]); }
 	void printPiece(const Piece piece, const bool UnicodeSupport) const;
 	void printBoard(const bool Heading, const bool UnicodeSupport) const;
 	int_fast8_t getWhiteMaterialAdvantage() const;
@@ -101,24 +137,26 @@ public:
 	bool isBlackControlled(Loc loc) const;
 	bool isWhiteChecked() const;
 	bool isBlackChecked() const;
-	bool willWhiteBeChecked(pair<Loc,Loc>) const;
-	bool willBlackBeChecked(pair<Loc,Loc>) const;
-	bool isWhiteCheckmated() const;
-	bool isBlackCheckmated() const;
-	bool isWhiteStalemated() const;
-	bool isBlackStalemated() const;
-	vector<Loc> getPossibleMoves(int row, int col) const;
-	vector<Loc> getPossibleEnPassant(int row, int col) const;
-	vector<Loc> getPossibleCastling(int row, int col) const;
-	vector<pair<Loc,Loc>> getAllWhitePossibleMoves() const;
-	vector<pair<Loc,Loc>> getAllBlackPossibleMoves() const;
-	bool move(pair<Loc,Loc>);
-	void moveNoCheck(pair<Loc,Loc>);
-	pair<pair<pair<int, int>, pair<int, int>>, int> findWhiteBestMove(int depth);
-	pair<pair<pair<int, int>, pair<int, int>>, int> findBlackBestMove(int depth); 
-	int findWhiteBestScore(int depth);
-	int findBlackBestScore(int depth);
-	void findBlackBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth);
-	void findWhiteBestMoveCore(pair<pair<int, int>, pair<int, int>>& BestMoveT, int& bestScoreT, vector<pair<pair < int, int>, pair<int, int>>>& PossibleMoves, int begin, int end, int depth);
+	inline bool willWhiteBeCheckedForHuman(pair<Loc,Loc>) const;
+	inline bool willBlackBeCheckedForHuman(pair<Loc,Loc>) const;
+	inline bool willWhiteBeCheckedForEngine(pair<Loc, Loc>) const;
+	inline bool willBlackBeCheckedForEngine(pair<Loc, Loc>) const;
+	bool isWhiteCheckmated(const vector<pair<Loc, Loc>>& AllWhitePossibleMoveNoChcek) const;
+	bool isBlackCheckmated(const vector<pair<Loc, Loc>>& AllBlackPossibleMoveNoChcek) const;
+	bool isWhiteStalemated(const vector<pair<Loc, Loc>>& AllWhitePossibleMoveNoChcek) const;
+	bool isBlackStalemated(const vector<pair<Loc, Loc>>& AllBlackPossibleMoveNoChcek) const;
+	vector<pair<Loc, Loc>> getPossibleRegularMovesRaw() const;
+	vector<Loc> getPossibleEnPassantRaw() const;
+	vector<Loc> getPossibleCastlingRaw() const;
+	vector<pair<Loc, Loc>> getAllLegalMovesForHuman() const;
+	vector<pair<Loc, Loc>> getAllPossibleMovesForEngine() const;
+	void MoveByHuman(const pair<Loc,Loc>);
+	void MoveByEngine(const pair<Loc,Loc>);
+	pair<Loc, Loc> findWhiteBestMove(int depth) const;
+	pair<Loc, Loc> findBlackBestMove(int depth) const;
+	void findWhiteBestMoveCore(pair<Loc, Loc>& attemptMove, int_fast8_t& bestScoreT, uint8_t depth) const;
+	void findBlackBestMoveCore(pair<Loc, Loc>& attemptMove, int_fast8_t& bestScoreT, uint8_t depth) const;
+	int_fast8_t findWhiteBestScore(uint8_t depth) const;
+	int_fast8_t findBlackBestScore(uint8_t depth) const;
 };
 #endif // !BOARD_H

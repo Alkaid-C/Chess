@@ -147,6 +147,7 @@
     <ClCompile Include="board.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="static.cpp" />
+    <ClCompile Include="unitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="board.h" />

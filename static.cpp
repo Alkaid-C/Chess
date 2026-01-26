@@ -19,12 +19,12 @@ static void removeDuplicatedLoc(std::vector<std::pair<int, int>>& locs) {
 	locs.erase(std::unique(locs.begin(), locs.end()), locs.end());
 }
 
-static bool PromptForUnicodeSupport()
+bool PromptForUnicodeSupport()
 {
 	using namespace std;
 	system("chcp 65001");
 	cout << "Does your terminal support unicode characters? (Y/N)" << endl;
-	cout << "For example, is this white pawn (" << u8"\u2659" << ") correctly displayed ? If not, type N." << :endl;
+	cout << "For example, is this white pawn (" << u8"\u2659" << ") correctly displayed ? If not, type N." << endl;
 	char unicode;
 	cin >> unicode;
 	if (unicode == 'Y')

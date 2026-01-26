@@ -24,6 +24,9 @@
     <ClCompile Include="static.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unitTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="board.h">
