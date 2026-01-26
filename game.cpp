@@ -291,6 +291,7 @@ Loc decodeLoc(const std::string& notation) {
 }
 
 string encodeLoc(Loc loc) {
+	// TODO: fix display for irregular moves
 	uint8_t rank = getRank(loc);
 	uint8_t file = getFile(loc);
 	string result;
