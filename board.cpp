@@ -174,7 +174,7 @@
 		if (Heading == White)
 		{
 			cout << "  A B C D E F G H" << endl;
-			for (int_fast8_t i = 7; i >0 ; i--)
+			for (int_fast8_t i = 7; i >= 0; i--)
 			{
 				cout << i + 1;
 				for (int_fast8_t j = 0; j < 8; j++)
@@ -192,7 +192,7 @@
 			for (int_fast8_t i = 0; i < 8; i++)
 			{
 				cout << i + 1;
-				for (int_fast8_t j = 7; j > 0; j--)
+				for (int_fast8_t j = 7; j >= 0; j--)
 				{
 					cout << " ";
 					printPiece(CurBoard[i*8+j], UnicodeSupported);
