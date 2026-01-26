@@ -206,7 +206,7 @@
 		vector<pair<Loc, Loc>> AllPossibleMoves = getAllPossibleMovesForEngine();
 		if (player==White)
 		{
-			if (isWhiteCheckmated(AllPossibleMoves) == true)
+			if (isBlackCheckmated(AllPossibleMoves) == true)
 			{ 
 				cout << "White Wins" << endl;
 				gameend = true;
@@ -671,7 +671,7 @@
 			for (const pair<Loc, Loc>& move : AllWhitePossibleMoveNoChcek)
 			{
 
-				if (!willBlackBeCheckedForEngine(move))
+				if (!willWhiteBeCheckedForEngine(move))
 				{
 					return false;
 				}
@@ -1110,9 +1110,9 @@
     vector<pair<Loc, Loc>> board::getAllLegalMovesForHuman() const //this is prepared for human input; computer won't use this function
     {
         vector<pair<Loc, Loc>> AllPossibleMoves = getPossibleRegularMovesRaw();
-        vector<Loc> UnproecssedEnPassant = getPossibleEnPassantRaw();
+        vector<Loc> UnprocessedEnPassant = getPossibleEnPassantRaw();
         vector<Loc> UnprocessedCastling = getPossibleCastlingRaw();
-        for (Loc pieceLoc : UnproecssedEnPassant)
+        for (Loc pieceLoc : UnprocessedEnPassant)
         {
             Loc target = (Loc)((uint8_t)LastMove.first + (uint8_t)LastMove.second / (uint8_t)2);
             AllPossibleMoves.push_back({ pieceLoc, target });
@@ -1145,9 +1145,9 @@
 	vector<pair<Loc, Loc>> board::getAllPossibleMovesForEngine() const
 	{
 		vector<pair<Loc, Loc>> AllPossibleMoves = getPossibleRegularMovesRaw();
-		vector<Loc> UnproecssedEnPassant = getPossibleEnPassantRaw();
+		vector<Loc> UnprocessedEnPassant = getPossibleEnPassantRaw();
 		vector<Loc> UnprocessedCastling = getPossibleCastlingRaw();
-		for (Loc pieceLoc : UnproecssedEnPassant)
+		for (Loc pieceLoc : UnprocessedEnPassant)
 		{
 			AllPossibleMoves.push_back({ pieceLoc, IrregularMoveTag });
 		}
