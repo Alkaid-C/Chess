@@ -10,8 +10,12 @@ static void testGame2();
 static void testGame3();
 static void testGame4();
 static void twoPlayerGame();
+static void PlayWithComputer();
+static void RunTimeBenchmark(int depth, int round);
 char static ColCast(int col);
 static pair<Loc, Loc> AskForMove();
+string encodeLoc(Loc loc);
+bool PromptForUnicodeSupport();
 
 int main()
 {
@@ -28,15 +32,17 @@ int main()
 	}
 	if (choice == 2)
 	{
+		PlayWithComputer();
 	}
 	if (choice == 3)
 	{
 		int depth=5;
-		cout << "You want to run benckmark with depth...(Recommendation: 4 or 5)" << endl;
+		cout << "You want to run benchmark with depth...(Recommendation: 4 or 5)" << endl;
 		cin >> depth;
 		int round=1;
-		cout << "You want to repeat benckmark for how many rounds?" << endl;
+		cout << "You want to repeat benchmark for how many rounds?" << endl;
 		cin >> round;
+		RunTimeBenchmark(depth, round);
 	}
 }
 
@@ -284,28 +290,37 @@ Loc decodeLoc(const std::string& notation) {
 	return static_cast<Loc>(index);
 }
 
+string encodeLoc(Loc loc) {
+	uint8_t rank = getRank(loc);
+	uint8_t file = getFile(loc);
+	string result;
+	result += ('A' + file);
+	result += ('1' + rank);
+	return result;
+}
+
 static pair<Loc,Loc> AskForMove()
 {
 	string piece;
 	string target;
-	std::cout <<"Enter the location of your piece and target (e.g. 2D 4D)" << endl;
+	std::cout <<"Enter the location of your piece and target (e.g. D2 D4)" << endl;
 	std::cin >> piece;
 	std::cin >> target;
 	return { decodeLoc(piece),decodeLoc(target) };
 }
-/*
+
 static void PlayWithComputer()
 {
 	int depth;
 	board theboard;
 	bool unicode=PromptForUnicodeSupport();
 	theboard.printBoard(false, unicode);
-	cout << "Computer Smarterness: (Recommended is  4. If you set it to 5, it will take several minutes to compute in complex situation. Type 0 for dynamic depth, which will think 5 steps in simple situation and 4 steps in complex situation to keep compute time no more than a minute)" << endl;
+	cout << "Computer Smartness: (Recommended is 4. If you set it to 5, it will take several minutes to compute in complex situations.)" << endl;
 	cin >> depth;
 	cout << "You want to play: (B/W)" << endl;
 	char user;
 	cin >> user;
-	if (user == 'W')
+	if (user == 'W' || user == 'w')
 	{
 		system("cls");
 		theboard.printBoard(false, unicode);
@@ -321,31 +336,29 @@ static void PlayWithComputer()
 				begin = high_resolution_clock::now();
 				pair<Loc,Loc> bestMove = theboard.findBlackBestMove(depth);
 				finish = high_resolution_clock::now();
-				consume += duration_cast<duration<double>>(finish - begin) ;
-				cout << "After thinking for " << consume.count() << " seconds, the computer plays : " << endl;
+				consume += duration_cast<duration<double>>(finish - begin);
+				cout << "After thinking for " << consume.count() << " seconds, the computer plays: " << encodeLoc(bestMove.first) << "-->" << encodeLoc(bestMove.second) << endl;
 				theboard.MoveByEngine(bestMove);
 				theboard.printBoard(false,unicode);
 			}
 			else
 			{
-				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				pair<Loc, Loc> userMove = AskForMove();
 				system("cls");
-				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
-				if (!theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second))
-				{
-					userMove = AskForMove();
-					theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
-				}
-				theboard.printBoard();
+				cout << "You play: " << encodeLoc(userMove.first) << "-->" << encodeLoc(userMove.second) << endl;
+				theboard.MoveByHuman(userMove);
+				theboard.printBoard(false, unicode);
 			}
 		}
 	}
 	else
 	{
 		system("cls");
-		while (!theboard.isBlackCheckmated() && !theboard.isWhiteCheckmated())
+		theboard.printBoard(false, unicode);
+		vector<pair<Loc, Loc>> allPossibleMoves = theboard.getAllPossibleMovesForEngine();
+		while (!theboard.isBlackCheckmated(allPossibleMoves) && !theboard.isWhiteCheckmated(allPossibleMoves))
 		{
-			if (theboard.mover == White)
+			if (theboard.player == White)
 			{
 				cout << "Computer is thinking..." << endl;
 				using namespace std::chrono;
@@ -353,26 +366,22 @@ static void PlayWithComputer()
 				high_resolution_clock::time_point begin;
 				high_resolution_clock::time_point finish;
 				begin = high_resolution_clock::now();
-				pair<pair<pair<int, int>, pair<int, int>>, int> bestMove = theboard.findWhiteBestMove(depth);
-				theboard.move(bestMove.first.first.first, bestMove.first.first.second, bestMove.first.second.first, bestMove.first.second.second);
+				pair<Loc, Loc> bestMove = theboard.findWhiteBestMove(depth);
 				finish = high_resolution_clock::now();
 				consume += duration_cast<duration<double>>(finish - begin);
-				cout << "After thinking for " << consume.count() << " seconds, the computer plays : " << bestMove.first.first.first << ColCast(bestMove.first.first.second) << "-->" << bestMove.first.second.first << ColCast(bestMove.first.second.second) << endl;
-				theboard.printBoard();
+				cout << "After thinking for " << consume.count() << " seconds, the computer plays: " << encodeLoc(bestMove.first) << "-->" << encodeLoc(bestMove.second) << endl;
+				theboard.MoveByEngine(bestMove);
+				theboard.printBoard(false, unicode);
 			}
 			else
 			{
-
-				pair<pair<int, int>, pair<int, int>> userMove = AskForMove();
+				pair<Loc, Loc> userMove = AskForMove();
 				system("cls");
-				cout << "You play:" << userMove.first.first << ColCast(userMove.first.second) << "-->" << userMove.second.first << ColCast(userMove.second.second) << endl;
-				if (!theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second))
-				{
-					userMove = AskForMove();
-					theboard.move(userMove.first.first, userMove.first.second, userMove.second.first, userMove.second.second);
-				}
-				theboard.printBoard();
+				cout << "You play: " << encodeLoc(userMove.first) << "-->" << encodeLoc(userMove.second) << endl;
+				theboard.MoveByHuman(userMove);
+				theboard.printBoard(false, unicode);
 			}
+			allPossibleMoves = theboard.getAllPossibleMovesForEngine();
 		}
 	}
 	cout << "Game Over" << endl;
@@ -380,7 +389,6 @@ static void PlayWithComputer()
 
 static void RunTimeBenchmark(int depth, int round)
 {
-
 	using namespace std::chrono;
 	duration<double> currrent1, currrent2, currrent3, currrent4;
 	high_resolution_clock::time_point begin;
@@ -389,57 +397,55 @@ static void RunTimeBenchmark(int depth, int round)
 	system("cls");
 	for (int i = 0; i < round; i++)
 	{
-        cout << "Benchmarking..." << i + 1 << "/" << round << endl;
+		cout << "Benchmarking..." << i + 1 << "/" << round << endl;
 		board testBoard;
-		testBoard.move(2, D, 4, D);
-		testBoard.move(7, D, 5, D);
-		testBoard.move(1, B, 3, C);
+		testBoard.MoveByHuman({D2, D4});
+		testBoard.MoveByHuman({D7, D5});
+		testBoard.MoveByHuman({B1, C3});
 		begin = high_resolution_clock::now();
 		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
 		cout << "test 1 of 4 done." << endl;
 		currrent1 += duration_cast<duration<double>>(finish - begin) / round;
-		testBoard.move(8, C, 6, E);
+		testBoard.MoveByHuman({C8, E6});
 		begin = high_resolution_clock::now();
 		testBoard.findWhiteBestMove(depth);
 		finish = high_resolution_clock::now();
 		cout << "test 2 of 4 done. The rest may take longer to run." << endl;
 		currrent2 += duration_cast<duration<double>>(finish - begin) / round;
 
-
-		testBoard.move(2, E, 4, E);
-		testBoard.move(5, D, 4, E);
-		testBoard.move(3, C, 4, E);
-		testBoard.move(8, D, 5, D);
-		testBoard.move(2, F, 3, F);
-		testBoard.move(8, B, 6, C);
-		testBoard.move(1, C, 3, E);
-		testBoard.move(8, E, 8, C);
-		testBoard.move(1, G, 2, E);
-		testBoard.move(7, G, 6, G);
+		testBoard.MoveByHuman({E2, E4});
+		testBoard.MoveByHuman({D5, E4});
+		testBoard.MoveByHuman({C3, E4});
+		testBoard.MoveByHuman({D8, D5});
+		testBoard.MoveByHuman({F2, F3});
+		testBoard.MoveByHuman({B8, C6});
+		testBoard.MoveByHuman({C1, E3});
+		testBoard.MoveByHuman({E8, C8});
+		testBoard.MoveByHuman({G1, E2});
+		testBoard.MoveByHuman({G7, G6});
 		begin = high_resolution_clock::now();
 		testBoard.findWhiteBestMove(depth);
 		finish = high_resolution_clock::now();
 		cout << "test 3 of 4 done." << endl;
 		currrent3 += duration_cast<duration<double>>(finish - begin) / round;
-		testBoard.move(2, C, 3, C);
+		testBoard.MoveByHuman({C2, C3});
 		begin = high_resolution_clock::now();
 		testBoard.findBlackBestMove(depth);
 		finish = high_resolution_clock::now();
 		cout << "test 4 of 4 done." << endl;
 		currrent4 += duration_cast<duration<double>>(finish - begin) / round;
 		if (i< round-1)
-		{ 
+		{
 			cout << "Waiting..." << endl;
 			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
 		system("cls");
 	}
 	system("cls");
-	cout << "Benchmark Resutl:" << endl;
+	cout << "Benchmark Result:" << endl;
 	cout << "Board1(B): " << currrent1.count() << "s" << endl;
 	cout << "Board2(W): " << currrent2.count() << "s" << endl;
 	cout << "Board3(W): " << currrent3.count() << "s" << endl;
 	cout << "Board4(B): " << currrent4.count() << "s" << endl;
 }
-*/
