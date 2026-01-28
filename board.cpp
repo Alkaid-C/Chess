@@ -1178,17 +1178,30 @@
 				}
 				else
 				{
-					assert(getFile(move.second) == FileG);//KingSide
-					CurBoard[getLoc(getRank(move.first), FileF)] = CurBoard[getLoc(getRank(move.first), FileH)];
-					CurBoard[getLoc(getRank(move.first), FileH)] = Empty;
+					if(getFile(move.second) == FileG)//KingSide
+					{
+						CurBoard[getLoc(getRank(move.first), FileF)] = CurBoard[getLoc(getRank(move.first), FileH)];
+						CurBoard[getLoc(getRank(move.first), FileH)] = Empty;
+					}
+					else
+					{
+						throw invalid_argument("Invalid Human Move");
+					}
 				}
 			}
 			else//EnPassant
 			{
-				assert(getRank(move.first) == 4 || getRank(move.first) == 5);
-				CurBoard[move.second] = CurBoard[move.first];
-				CurBoard[move.first] = Piece::Empty;
-				CurBoard[getLoc(getRank(move.first), getFile(move.second))] = Piece::Empty;
+				if (getRank(move.first) == 4 || getRank(move.first) == 5)
+				{
+					CurBoard[move.second] = CurBoard[move.first];
+					CurBoard[move.first] = Piece::Empty;
+					CurBoard[getLoc(getRank(move.first), getFile(move.second))] = Piece::Empty;
+				}
+				else
+				{
+					throw invalid_argument("Invalid Human Move");
+				}
+
 			}
 		}
 		player = (Player)!player;
@@ -1211,17 +1224,29 @@
 			}
 			else
 			{
-				assert((getFile(move.second) == FileG));//KingSide
-				CurBoard[getLoc(getRank(move.second), FileF)] = CurBoard[getLoc(getRank(move.second), FileH)];
-				CurBoard[getLoc(getRank(move.second), FileH)] = Empty;
+				if((getFile(move.second) == FileG))//KingSide
+				{
+					CurBoard[getLoc(getRank(move.second), FileF)] = CurBoard[getLoc(getRank(move.second), FileH)];
+					CurBoard[getLoc(getRank(move.second), FileH)] = Empty;
+				}
+				else
+				{
+					throw invalid_argument("Invalid Engine Move");
+				}
 			}
 		}
 		else //EnPassant. For EnPassant, defining target square is enough to determine the move
 		{
-			assert(move.second == IrregularMoveTag);
-			CurBoard[getLoc((getRank(LastMove.first) + getRank(LastMove.second)) / 2, getFile(LastMove.first))]= CurBoard[move.first];
-			CurBoard[move.first] = Piece::Empty;
-			CurBoard[LastMove.second] = Piece::Empty;
+			if(move.second == IrregularMoveTag)
+			{
+				CurBoard[getLoc((getRank(LastMove.first) + getRank(LastMove.second)) / 2, getFile(LastMove.first))]= CurBoard[move.first];
+				CurBoard[move.first] = Piece::Empty;
+				CurBoard[LastMove.second] = Piece::Empty;
+			}
+			else
+			{
+				throw invalid_argument("Invalid Engine Move");
+			}
 		}
 		player = (Player)!player;
 	}
